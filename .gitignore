@@ -1,0 +1,7 @@
+data/grs/*
+!data/grs/source.md
+
+data/txts/*
+!data/txts/source.md
+
+data/dimension_reduction/
