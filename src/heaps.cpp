@@ -373,6 +373,6 @@ struct radix : heap_inter{
     }
     
     void relax(int u, keyType w, keyType old_du, keyType new_du)  { 
-        rh.push(w, u);
+        rh.push(new_du, u);
     }
 };

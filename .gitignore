@@ -5,3 +5,5 @@ data/txts/*
 !data/txts/source.md
 
 data/dimension_reduction/
+
+docs/
