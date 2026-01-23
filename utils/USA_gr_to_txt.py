@@ -41,7 +41,7 @@ def transformar_grafo(input_file, output_file):
     except Exception as e:
         print(f"ERRO ao processar arquivo: {e}")
 
-grafos = ["COL", "BAY", "E", "FLA", "W"]
+grafos = ["NE", "CAL"]
 
 for g in grafos:
     # Verificar se o arquivo existe
@@ -60,4 +60,4 @@ for g in grafos:
 
     # Executar transformação
     print("\n=== INICIANDO TRANSFORMAÇÃO ===")
-    transformar_grafo(arquivo_entrada, "data/"+g+".txt")
+    transformar_grafo(arquivo_entrada, "../data/txts/"+g+".txt")

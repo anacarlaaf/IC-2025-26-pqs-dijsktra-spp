@@ -28,9 +28,10 @@ def ler_dados(arquivo_entrada):
 
 
 def plotar_grafico(df):
-    
-    algoritmos = ['BINARY_HEAP', 'B_HEAP', 'RB_TREE', 'FIBONACCI_HEAP', 'DIAL', 'TWO_LV_BKT_HEAP', 'RADIX_HEAP']
-    marcadores = ['o', 's', '^', 'D', 'v', '*', 'p', 'h', 'X', 'P', "Q", 'A']
+
+
+    algoritmos = ['BINARY_HEAP', 'RB_TREE', 'FIBONACCI_HEAP', 'DIAL', 'TWO_LV_BKT_HEAP']
+    marcadores = ['o', 's', '^', 'D', 'v'] #'*', 'p', 'h', 'X', 'P', "Q", 'A']
     
     # Gráfico 1: Tempos por n
     plt.figure(figsize=(10, 6))
@@ -44,6 +45,7 @@ def plotar_grafico(df):
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
     plt.savefig('data/graphs/tn.png', dpi=300)
+    plt.show()
 
 def main():
     # Nome do arquivo de entrada
