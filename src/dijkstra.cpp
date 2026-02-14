@@ -22,7 +22,7 @@ struct shortest_path {
         dist[s] = 0;
         
         if (q) q->clear();
-        q->insert(0, s, 0);  
+        q->insert(s, 0, 0);  
     }
 
     void dijkstra_dk(const auto &adj, pq &q) {
@@ -30,7 +30,7 @@ struct shortest_path {
         while(!q->empty()) {
             auto [du, u] = q->extract_min();
             in_heap[u] = false; // removido do heap
-            if(dist[u] < du) continue;
+            // if(dist[u] < du) continue;
     
             for(auto [w, v] : adj[u]) {
                 if(dist[v] > dist[u] + w) {

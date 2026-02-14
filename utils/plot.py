@@ -30,7 +30,7 @@ def ler_dados(arquivo_entrada):
 def plotar_grafico(df):
 
 
-    algoritmos = ['BINARY_HEAP', 'RB_TREE', 'FIBONACCI_HEAP', 'DIAL', 'TWO_LV_BKT_HEAP']
+    algoritmos = ['BINARY_HEAP', 'FIBONACCI_HEAP', 'DIAL', 'TWO_LV_BKT_HEAP']
     marcadores = ['o', 's', '^', 'D', 'v'] #'*', 'p', 'h', 'X', 'P', "Q", 'A']
     
     # Gráfico 1: Tempos por n

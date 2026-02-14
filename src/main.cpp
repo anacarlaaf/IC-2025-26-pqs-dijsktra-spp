@@ -45,8 +45,9 @@ pq create_pq(PQS q, int n, keyType c) {
 void exec_time(){
 
     timer otimer;
-    PQS pqs[7] = {BINARY_HEAP, B_HEAP, RB_TREE, FIBONACCI_HEAP, DIAL, TWO_LV_BKT_HEAP, RADIX_HEAP};
-    string data[4] = {"BAY", "COL", "FLA", "E"};
+    PQS pqs[4] = {BINARY_HEAP, FIBONACCI_HEAP, DIAL, TWO_LV_BKT_HEAP};
+    //string data[12] = {"NY", "BAY", "COL", "FLA", "NW", "NE", "CAL", "LKS", "E", "W", "CTR", "USA"};
+    string data[1] = {"USA"};
 
     string output = "../data/outs/time.csv";
     ofstream fileO(output);

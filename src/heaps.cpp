@@ -9,8 +9,8 @@
 #include <list>
 #include <assert.h>
 #include <cstring>
-#include "fibonacci_heap.cpp"
-#include "radix_heap.h"
+#include "heaps/fibonacci_heap.cpp"
+#include "heaps/radix_heap.h"
 
 using namespace std;
 
@@ -183,14 +183,8 @@ struct rb_tree : heap_inter{
     }
 
     void relax(int u, keyType w, keyType old_du, keyType new_du) {
-        auto no = pq.extract({old_du, u});
-        if (!no.empty()) {
-            no.value() = {new_du, u};
-            pq.insert(move(no));
-        }
-        else{
-            pq.insert({new_du, u});
-        }
+        pq.erase({old_du, u});
+        pq.insert({new_du, u});
     }
 };
 
@@ -270,6 +264,69 @@ struct dial : heap_inter{
     }
 
     void relax(int u, keyType w, keyType old_du, keyType new_du){
+        insert(u, new_du, w);
+    }
+
+};
+
+
+
+struct dialdk : heap_inter{
+    vector<list<int>> b;
+    vector<list<int>::iterator> ptr;
+
+    int nbuckets = -1;
+    int a = 0, r = 0, sz = 0, c = 0;
+    
+    dialdk(int c_){
+        c = c_;
+        nbuckets = c + 1;
+        b.assign(nbuckets, {});
+        ptr.resize(nbuckets, b[0].end());
+    };
+
+    void clear() {
+        a = 0, r = 0, sz = 0;
+        for(auto &l: b) l.clear();
+    }
+    
+    void insert(int u, keyType du, keyType w) {
+        // assert(w <= c);
+        int id = (a + w) % nbuckets;
+        b[id].push_back(u);
+        ptr[u] = prev(b[id].end());
+        sz++;
+    }
+
+    void update() {
+        if(b[a].size()) return;
+
+        int bg = a;
+        do {
+            a++;
+            if(a == nbuckets) a = 0, r++;
+
+            if(b[a].size()) return;
+        } while(a != bg);
+        assert(false);
+    }
+
+    par extract_min() {
+        update();
+        int u = b[a].front();
+        int du = r * nbuckets + a;
+        b[a].pop_front();
+        sz--;
+        
+        return make_pair(du, u);
+    }
+
+    bool empty() {
+        return sz == 0;
+    }
+
+    void relax(int u, keyType w, keyType old_du, keyType new_du, keyType *dist){
+        b[dist[u] % c].erase(ptr[u]);
         insert(u, new_du, w);
     }
 
