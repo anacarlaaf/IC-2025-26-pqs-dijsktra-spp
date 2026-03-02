@@ -11,3 +11,13 @@ typedef pair<keyType,int> par;
 
 typedef vector<vector<parInt>> graphInt;
 typedef vector<vector<par>> graph;
+
+
+#ifndef NPTR_DEFINED
+#define NPTR_DEFINED
+typedef struct nptr {
+    int lvl;
+    int idx;
+    list<par>::iterator it;
+} nptr;
+#endif

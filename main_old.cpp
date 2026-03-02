@@ -1,94 +1,70 @@
 #include "dijkstra.cpp"
 #include "../utils/perf.cpp"
-#include "bits/stdc++.h"
+#include <iostream>
+#include <fstream>
 using namespace std;
 
 //g++ -std=c++20 main.cpp -o main
 
 enum PQS {
-    RBT,
-    FIBH,
-    BINH,
-    _1LVBQ1,
-    _1LVBQ2,
-    _2LVBQ1,
-    _2LVBQ2,
-    _4LVBQ,
-    _KLVBQ,
+    RB_TREE,
+    FIBONACCI_HEAP,
+    BINARY_HEAP,
+    B_HEAP,
+    DIAL,
+    TWO_LV_BKT_HEAP,
+    RADIX_HEAP,
 };
 
-map<string, PQS> toPq = {
-    {"RBT", RBT},
-    {"FIBH", FIBH},
-    {"BINH", BINH},
-    {"1LVBQ1", _1LVBQ1},
-    {"1LVBQ2", _1LVBQ2},
-    {"2LVBQ1", _2LVBQ1},
-    {"2LVBQ2", _2LVBQ2},
-    {"4LVBQ", _4LVBQ},
-    {"KLVBQ", _KLVBQ}
-};
-
-pq create_pq(PQS q, int n, keyType c, int k=0) {
+string pq_string(PQS q) {
     switch(q) {
-        case BINH: return new binheap(n);
-        case RBT: return new rb_tree();
-        case FIBH: return new fibonacci(n);
-        case _1LVBQ1 : return new _1lvbq1(c);
-        case _1LVBQ2 : return new _1lvbq2(c, n);
-        case _2LVBQ1 : return new _2lvbq1(c);
-        case _2LVBQ2 : return new _2lvbq2(c, n);
-        case _4LVBQ : return new _4lvbq(c, n);
-        case _KLVBQ : return new _klvbq(c, n, k);
+        case RB_TREE: return "RB_TREE";
+        case FIBONACCI_HEAP: return "FIBONACCI_HEAP";
+        case BINARY_HEAP: return "BINARY_HEAP";
+        case B_HEAP: return "B_HEAP";
+        case DIAL: return "DIAL";
+        case TWO_LV_BKT_HEAP: return "TWO_LV_BKT_HEAP";
+        case RADIX_HEAP : return "RADIX_HEAP";
+        default: return "UNKNOWN";
+    }
+}
+
+pq create_pq(PQS q, int n, keyType c) {
+    switch(q) {
+        case BINARY_HEAP: return new bin_heap(n);
+        case B_HEAP : return new b_heap(n);
+        case RB_TREE: return new rb_tree();
+        case FIBONACCI_HEAP: return new fibonacci(n);
+        case DIAL: return new dial(c);
+        case TWO_LV_BKT_HEAP: return new _2_lv_bkt(c);
+        case RADIX_HEAP : return new radix();
         default: return nullptr;
     }
 }
 
-void exp(){
+void exec_time(){
 
     timer otimer;
-    vector<string> pqs = {"BINH", "1LVBH1", "2LVBH1"};
-    vector<string> input = {"NY", "BAY", "COL", "CTR", "FLA"};
-
-    string data = "input.txt";
-    string hps = "heaps.txt";
-
-    // ifstream file_data(data);
-    // ifstream file_pqs(hps);
-
-    // string line;
-    // while(getline(file_data, line)){
-    //     istringstream iss(line);
-    //     string s;
-    //     iss >> s;
-    //     pqs.push_back(toPq[s]);
-    // }
-
-    // while(getline(file_pqs, line)){
-    //     istringstream iss(line);
-    //     string s;
-    //     iss >> s;
-    //     input.push_back(s);
-    // }
+    PQS pqs[4] = {BINARY_HEAP, FIBONACCI_HEAP, DIAL, TWO_LV_BKT_HEAP};
+    //string data[12] = {"NY", "BAY", "COL", "FLA", "NW", "NE", "CAL", "LKS", "E", "W", "CTR", "USA"};
+    string data[1] = {"USA"};
 
     string output = "../data/outs/time.csv";
-
     ofstream fileO(output);
 
     fileO << fixed << setprecision(6);
     fileO <<"nome n m c ";
     fileO.flush();
 
-    for (string p : pqs){
-        fileO << p << " ";
+    for (PQS p : pqs){
+        fileO << pq_string(p) << " ";
         fileO.flush();
     }
     fileO << "\n";
     fileO.flush();
 
-    for (string f : input){
+    for (string f : data){
         
-        // Abre arquivo
         string filename = "../data/txts/"+f+".txt";
         ifstream file(filename);
         if (!file.is_open()) {
@@ -96,13 +72,15 @@ void exp(){
             continue;
         }
 
-        // Lê quantidade de vértices e arestas
         string line;
+
+        // Lê quantidade de vértices e arestas
         getline(file, line);
         istringstream iss(line);
         int qtd_ver, qtd_edges;
         iss >> qtd_ver >> qtd_edges;
 
+        int edge_count = 0;
         keyType max_weight = -1;
         graph g;
         g.resize(qtd_ver + 1);
@@ -121,34 +99,35 @@ void exp(){
 
                 max_weight = max(max_weight, c);
             }
+            edge_count++;
         }
         file.close();
 
         fileO << f << " " <<  qtd_ver << " " << qtd_edges <<  " " << max_weight << " ";
         fileO.flush();
 
-        // Grafo
         cout << "\nNome: " << f << "\n";
         cout << "Vértices: " << qtd_ver << "\n";
         cout << "Arestas: " << qtd_edges << "\n";
+        cout << "Arestas processadas: " << edge_count << "\n";
         cout << "Maior peso: " << max_weight << "\n";
 
         cout << "Fila                 Tempo de execução\n";
 
         int elap_sum = 0;
 
-        // Experimentos
-        bool dk = false, both=false;
-        for(string s : pqs) {
+        // Exprimentos de priority queues
+        bool dk = false;
+        for(PQS p : pqs) {
             
-            PQS p = toPq[s];
-            if (p==RBT or p==FIBH or p==_1LVBQ2 or p==_2LVBQ2 or p==_KLVBQ or p==_4LVBQ) dk = true;
+            
+            if (p==RB_TREE or p==FIBONACCI_HEAP) dk = true;
             else dk = false;
 
             shortest_path sp;
             elap_sum = 0;
             for(int i = 0; i < 10; i++) {
-                pq q = create_pq(p, qtd_ver, max_weight, 6);
+                pq q = create_pq(p, qtd_ver, max_weight);
                 if(!q) continue;
 
                 otimer.start();
@@ -171,7 +150,7 @@ void exp(){
             }
 
             float elap_avg = elap_sum / 10.00;
-            printf("%-20s %10.6f ms\n", s.c_str(), elap_avg);
+            printf("%-20s %10.6f ms\n", pq_string(p).c_str(), elap_avg);
             fileO << elap_avg << " ";
             fileO.flush();
         }
@@ -184,6 +163,6 @@ void exp(){
 }
 
 int main() {
-    exp();
+    exec_time();
     return 0;
 }
