@@ -37,34 +37,35 @@ struct _klv_bucket_queue_DK{
     };
  
     void insert(int v, keyType dist, keyType w){
-        ll lvs[lv];
-        for(int i=0;i<lv-1;i++) lvs[i] = dist/size[lv-i-1] % size[0]; // equivale a (dist/size[0]) % size[0]
-        lvs[lv-1] = dist % size[0];
         sz++;
-
+        
+        ll lvs;
         for(int i=0;i<lv-2;i++){
-            if(lvs[i] != act[i]){
-                bucket[i][lvs[i]].push_back({dist, v});
+            lvs = dist/size[lv-i-1] % size[0];
+            if(lvs != act[i]){
+                bucket[i][lvs].push_back({dist, v});
                 ptr[v].lvl = i;
-                ptr[v].idx = lvs[i];
-                ptr[v].it = prev(bucket[i][lvs[i]].end());
+                ptr[v].idx = lvs;
+                ptr[v].it = prev(bucket[i][lvs].end());
                 actLv[i]++;
                 return;
             }
         }
 
-        if (lvs[lv-2] != act[lv-2] || lvs[lv-1] < act[lv-1]){
-            bucket[lv-2][lvs[lv-2]].push_back({dist, v});
+        lvs = dist/size[lv-2] % size[0];
+        ll last_lvs = dist % size[0];
+        if (lvs != act[lv-2] || last_lvs < act[lv-1]){
+            bucket[lv-2][lvs].push_back({dist, v});
             ptr[v].lvl = lv-2;
-            ptr[v].idx = lvs[lv-2];
-            ptr[v].it = prev(bucket[lv-2][lvs[lv-2]].end());
+            ptr[v].idx = lvs;
+            ptr[v].it = prev(bucket[lv-2][lvs].end());
             actLv[lv-2]++;
         }
         else{
-            bucket[lv-1][lvs[lv-1]].push_back({dist, v});
+            bucket[lv-1][last_lvs].push_back({dist, v});
             ptr[v].lvl = lv-1;
-            ptr[v].idx = lvs[lv-1];
-            ptr[v].it = prev(bucket[lv-1][lvs[lv-1]].end());
+            ptr[v].idx = last_lvs;
+            ptr[v].it = prev(bucket[lv-1][last_lvs].end());
             actLv[lv-1]++;
         }
     }
@@ -72,7 +73,7 @@ struct _klv_bucket_queue_DK{
     void update(){
         
         // procura bucket não vazio no nível mais baixo
-        while(act[lv-1] < size[lv-1] && bucket[lv-1][act[lv-1]].empty()) act[lv-1]++;
+        while(act[lv-1] < size[0] && bucket[lv-1][act[lv-1]].empty()) act[lv-1]++;
         if(act[lv-1] < size[0]) return;
 
 
@@ -123,6 +124,7 @@ struct _klv_bucket_queue_DK{
         ptr[min_elem.second].idx = -1;
         actLv[lv-1]--;
         sz--;
+        ptr[min_elem.second] = {-1, -1, list<par>::iterator{}};
         return min_elem;
     }
  
@@ -133,7 +135,7 @@ struct _klv_bucket_queue_DK{
 
     void clear(){
         for(int i=0;i<lv;i++) {
-            bucket[i].clear();
+            for (auto &l : bucket[i]) l.clear();
             actLv[i] = 0;
             act[i] = 0;
         }
@@ -164,7 +166,7 @@ struct _klv_bucket_queue{
     int lv;
  
     // inicia os buckets
-    _klv_bucket_queue(keyType c, int n, int k){                  // c = maior peso
+    _klv_bucket_queue(keyType c, int k){                  // c = maior peso
         lv = k;
         int sqrtSize = pow(c + 1.0, 1.0/k);
         size.resize(k, 0);
@@ -188,25 +190,26 @@ struct _klv_bucket_queue{
     };
  
     void insert(int v, keyType dist, keyType w){
-        ll lvs[lv];
-        for(int i=0;i<lv-1;i++) lvs[i] = dist/size[lv-i-1] % size[0]; // equivale a (dist/size[0]) % size[0]
-        lvs[lv-1] = dist % size[0];
         sz++;
-
+        
+        ll lvs;
         for(int i=0;i<lv-2;i++){
-            if(lvs[i] != act[i]){
-                bucket[i][lvs[i]].push({dist, v});
+            lvs = dist/size[lv-i-1] % size[0];
+            if(lvs != act[i]){
+                bucket[i][lvs].push({dist, v});
                 actLv[i]++;
                 return;
             }
         }
 
-        if (lvs[lv-2] != act[lv-2] || lvs[lv-1] < act[lv-1]){
-            bucket[lv-2][lvs[lv-2]].push({dist, v});
+        lvs = dist/size[lv-2] % size[0];
+        ll last_lvs = dist % size[0];
+        if (lvs != act[lv-2] || last_lvs < act[lv-1]){
+            bucket[lv-2][lvs].push({dist, v});
             actLv[lv-2]++;
         }
         else{
-            bucket[lv-1][lvs[lv-1]].push({dist, v});
+            bucket[lv-1][last_lvs].push({dist, v});
             actLv[lv-1]++;
         }
     }
@@ -214,7 +217,7 @@ struct _klv_bucket_queue{
     void update(){
         
         // procura bucket não vazio no nível mais baixo
-        while(act[lv-1] < size[lv-1] && bucket[lv-1][act[lv-1]].empty()) act[lv-1]++;
+        while(act[lv-1] < size[0] && bucket[lv-1][act[lv-1]].empty()) act[lv-1]++;
         if(act[lv-1] < size[0]) return;
 
 
@@ -270,7 +273,7 @@ struct _klv_bucket_queue{
 
     void clear(){
         for(int i=0;i<lv;i++) {
-            bucket[i].clear();
+            for (auto &q : bucket[i]) while (!q.empty()) q.pop();
             actLv[i] = 0;
             act[i] = 0;
         }

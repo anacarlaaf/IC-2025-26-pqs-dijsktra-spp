@@ -20,4 +20,35 @@ typedef struct nptr {
     int idx;
     list<par>::iterator it;
 } nptr;
+
+
+enum PQS {
+    BINHCPP,
+    RBT,
+    FIBH,
+    BINH,
+    _1LVBQ,
+    _2LVBQ,
+    _4LVBQ,
+    _KLVBQ,
+    _1LVBQDK,
+    _2LVBQDK,
+    _4LVBQDK,
+    _KLVBQDK,
+};
+
+map<string, PQS> toPq = {
+    {"RBT", RBT},
+    {"FIBH", FIBH},
+    {"BINH", BINH},
+    {"1LVBQ", _1LVBQ},
+    {"2LVBQ", _2LVBQ},
+    {"4LVBQ", _4LVBQ},
+    {"KLVBQ", _KLVBQ},
+    {"1LVBQDK", _1LVBQDK},
+    {"2LVBQDK", _2LVBQDK},
+    {"4LVBQDK", _4LVBQDK},
+    {"KLVBQDK", _KLVBQDK}
+};
+
 #endif

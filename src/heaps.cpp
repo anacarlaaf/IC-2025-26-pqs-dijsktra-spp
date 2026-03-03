@@ -17,6 +17,36 @@ struct heap_inter {
     virtual ~heap_inter() = default;
 };
 
+// Sem suporte a decrease_key
+
+struct binheapCPP : heap_inter{
+    priority_queue<par, vector<par>, greater<par>> pq;
+
+    
+    void insert(int u, keyType du, keyType w){
+        pq.push({du, u});
+    }
+
+    par extract_min(){
+        par v = pq.top();
+        pq.pop();
+        return v;
+    }
+
+    bool empty(){
+        return pq.empty();
+    }
+
+    void clear(){
+        while(!pq.empty()) pq.pop();
+    }
+
+    void decrease_key(int u, keyType w, keyType old_du, keyType new_du){
+        cerr << "Estrutura sem suporte a decrease_key";
+        exit(1);
+    }
+};
+
 struct binheap : heap_inter{
 
     bin_heap pq;
@@ -40,11 +70,125 @@ struct binheap : heap_inter{
     }
 
     void decrease_key(int u, keyType w, keyType old_du, keyType new_du){
-        return;
+        cerr << "Estrutura sem suporte a decrease_key";
+        exit(1);
     }
 
 };
 
+struct _1lvbq : heap_inter{
+    
+    _1lv_bucket_queue bq;
+
+    _1lvbq(keyType _c) : bq(_c) {}
+
+    void clear() {
+        bq.clear();
+    }
+    
+    void insert(int u, keyType du, keyType w) {
+       bq.insert(u, du, w);
+    }
+
+    par extract_min() {
+        return bq.extract_min();
+    }
+
+    bool empty() {
+        return bq.empty();
+    }
+
+    void decrease_key(int u, keyType w, keyType old_du, keyType new_du){
+        cerr << "Estrutura sem suporte a decrease_key";
+        exit(1);
+    }
+};
+
+struct _2lvbq : heap_inter{
+    
+    _2lv_bucket_queue bq;
+
+    _2lvbq(keyType _c) : bq(_c) {}
+
+    void clear() {
+        bq.clear();
+    }
+    
+    void insert(int u, keyType du, keyType w) {
+       bq.insert(u, du, w);
+    }
+
+    par extract_min() {
+        return bq.extract_min();
+    }
+
+    bool empty() {
+        return bq.empty();
+    }
+
+    void decrease_key(int u, keyType w, keyType old_du, keyType new_du){
+        cerr << "Estrutura sem suporte a decrease_key";
+        exit(1);
+    }
+};
+
+struct _4lvbq : heap_inter{
+    
+    _4lv_bucket_queue bq;
+
+    _4lvbq(keyType _c) : bq(_c) {}
+
+    void clear() {
+        bq.clear();
+    }
+    
+    void insert(int u, keyType du, keyType w) {
+       bq.insert(u, du, w);
+    }
+
+    par extract_min() {
+        return bq.extract_min();
+    }
+
+    bool empty() {
+        return bq.empty();
+    }
+
+    void decrease_key(int u, keyType w, keyType old_du, keyType new_du){
+        cerr << "Estrutura sem suporte a decrease_key";
+        exit(1);
+    }
+};
+
+struct _klvbq : heap_inter{
+    
+    _klv_bucket_queue bq;
+
+    _klvbq(keyType _c, int k) : bq(_c, k) {}
+
+    void clear() {
+        bq.clear();
+    }
+    
+    void insert(int u, keyType du, keyType w) {
+       bq.insert(u, du, w);
+    }
+
+    par extract_min() {
+        return bq.extract_min();
+    }
+
+    bool empty() {
+        return bq.empty();
+    }
+
+    void decrease_key(int u, keyType w, keyType old_du, keyType new_du){
+        cerr << "Estrutura sem suporte a decrease_key";
+        exit(1);
+    }
+};
+
+// Cem suporte a decrease_key
 
 struct rb_tree : heap_inter{
     set<par> pq;
@@ -95,72 +239,17 @@ struct fibonacci : heap_inter {
     }
     
     void decrease_key(int u, keyType w, keyType old_du, keyType new_du)  { 
-        fh.decrease_key(u, new_du);
+        keyType current_key;
+        if (fh.get_key(u, current_key) == -1) fh.insert(new_du, u);
+        else fh.decrease_key(u, new_du);
     }
 };
 
-
-struct _1lvbq1 : heap_inter{
-    vector<list<int>> b;
-    int nbuckets = -1;
-    int a = 0, r = 0, sz = 0, c = 0;
+struct _1lvbqDK : heap_inter{
     
-    _1lvbq1(int c_){
-        c = c_;
-        nbuckets = c + 1;
-        b.assign(nbuckets, {});
-    };
+    _1lv_bucket_queue_DK bq;
 
-    void clear() {
-        a = 0, r = 0, sz = 0;
-        for(auto &l: b) l.clear();
-    }
-    void insert(int u, keyType du, keyType w) {
-        // assert(w <= c);
-        int id = (a + w) % nbuckets;
-        b[id].push_back(u);
-        sz++;
-    }
-    void update() {
-        if(b[a].size()) return;
-
-        int bg = a;
-        do {
-            a++;
-            if(a == nbuckets) a = 0, r++;
-
-            if(b[a].size()) return;
-        } while(a != bg);
-        assert(false);
-    }
-
-    par extract_min() {
-        update();
-        int u = b[a].front();
-        int du = r * nbuckets + a;
-        b[a].pop_front();
-        sz--;
-        
-        return make_pair(du, u);
-    }
-
-    bool empty() {
-        return sz == 0;
-    }
-
-    void decrease_key(int u, keyType w, keyType old_du, keyType new_du){
-        insert(u, new_du, w);
-    }
-
-};
-
-
-
-struct _1lvbq2 : heap_inter{
-    
-    _1lv_bucket_queue bq;
-
-    _1lvbq2(keyType _c, int n) : bq(_c, n) {}
+    _1lvbqDK(keyType _c, int n) : bq(_c, n) {}
 
     void clear() {
         bq.clear();
@@ -181,89 +270,13 @@ struct _1lvbq2 : heap_inter{
     void decrease_key(int u, keyType w, keyType old_du, keyType new_du){
         bq.decrease_key(u, w, old_du, new_du);
     }
-
 };
 
-struct _2lvbq1 : heap_inter{
-    vector<queue<par>> top_bucket, bottom_bucket;
- 
-    ll at = 0, ab = 0; // at = top bucket ativo, ab = bottom bucket ativo
-    ll b_size = 0;     // tamanho dos buckets
-    int sz = 0;        // quantidade de elementos na estrutura
- 
-    // inicia os buckets
+struct _2lvbqDK : heap_inter{
     
-    _2lvbq1(keyType c){                  // c = maior peso
-        b_size = sqrt(c + 1) + 1;     // tamanho dos buckets
-        top_bucket.resize(b_size);
-        bottom_bucket.resize(b_size);
-    };
- 
-    void insert(int v, keyType dist, keyType w){
-        ll i = dist / b_size % b_size;   // se i = top bucket ativo, insere no bottom
-        ll j = dist % b_size;            // se não, insere no top
-    
-        if (i == at && j >= ab) bottom_bucket[j].push({dist,v});
-        else top_bucket[i].push({dist,v});
- 
-        sz++;
-    }
- 
-    void update(){
-        // procura o próximo bottom bucket não vazio
-        while (ab < b_size && bottom_bucket[ab].empty()) ab++;
-        if(ab < b_size) return;
- 
-        // Expand: se nao encontrar, distribui elementos de outro top bucket
-        ll start = at;
-        do {
-            if(top_bucket[at].size()) break;
-            at++;
-            if(at == b_size) at = 0;
-        }  while(at != start);
-        if(!top_bucket[at].size()) return;
- 
-        // distribui no bottom_bucket apenas os atuais, ignorando as novas inserções
-        int aux = top_bucket[at].size();
-        ab = b_size;
-        for(int i=0;i<aux;i++){
-            auto a = top_bucket[at].front(); top_bucket[at].pop();
-            ll nova_ab = a.first % b_size;
-            ab = min(ab, nova_ab);
-            bottom_bucket[nova_ab].push(a);  // insere no bottom bucket
-        }
-     }
- 
-    par extract_min(){
-        update();
-        par min_elem = bottom_bucket[ab].front();
-        bottom_bucket[ab].pop();
-        sz --;
-        return min_elem;
-    }
- 
-    bool empty() {
-        return sz == 0;
-    }
+    _2lv_bucket_queue_DK bq;
 
-    void clear(){
-        for(int i=0;i<b_size;i++){
-            while(!top_bucket[i].empty()) top_bucket[i].pop();
-            while(!bottom_bucket[i].empty()) bottom_bucket[i].pop();
-        }
-    }
-
-    void decrease_key(int u, keyType w, keyType old_du, keyType new_du){
-        return;
-    }
-
-};
-
-struct _2lvbq2 : heap_inter{
-    
-    _2lv_bucket_queue bq;
-
-    _2lvbq2(keyType _c, int n) : bq(_c, n) {}
+    _2lvbqDK(keyType _c, int n) : bq(_c, n) {}
 
     void clear() {
         bq.clear();
@@ -284,14 +297,13 @@ struct _2lvbq2 : heap_inter{
     void decrease_key(int u, keyType w, keyType old_du, keyType new_du){
         bq.decrease_key(u, w, old_du, new_du);
     }
-
 };
 
-struct _4lvbq : heap_inter{
+struct _4lvbqDK : heap_inter{
     
-    _4lv_bucket_queue bq;
+    _4lv_bucket_queue_DK bq;
 
-    _4lvbq(keyType _c, int n) : bq(_c, n) {}
+    _4lvbqDK(keyType _c, int n) : bq(_c, n) {}
 
     void clear() {
         bq.clear();
@@ -312,14 +324,13 @@ struct _4lvbq : heap_inter{
     void decrease_key(int u, keyType w, keyType old_du, keyType new_du){
         bq.decrease_key(u, w, old_du, new_du);
     }
-
 };
 
-struct _klvbq : heap_inter{
+struct _klvbqDK : heap_inter{
     
-    _klv_bucket_queue bq;
+    _klv_bucket_queue_DK bq;
 
-    _klvbq(keyType _c, int n, int k) : bq(_c, n, k) {}
+    _klvbqDK(keyType _c, int n, int k) : bq(_c, n, k) {}
 
     void clear() {
         bq.clear();
@@ -340,5 +351,4 @@ struct _klvbq : heap_inter{
     void decrease_key(int u, keyType w, keyType old_du, keyType new_du){
         bq.decrease_key(u, w, old_du, new_du);
     }
-
 };

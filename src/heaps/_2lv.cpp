@@ -100,6 +100,7 @@ struct _2lv_bucket_queue_DK{
                 top_bucket[i].erase(ptr[u]);
                 qtdA--;
             }
+            ptr[u] = list<par>::iterator{};
         }
 
         insert(u, new_du, w);
@@ -116,7 +117,7 @@ struct _2lv_bucket_queue{
 
     // inicia os buckets
     
-    _2lv_bucket_queue(keyType c, int n){                  // c = maior peso
+    _2lv_bucket_queue(keyType c){                  // c = maior peso
         b_size = sqrt(c + 1) + 1; // quantidade de buckets
         top_bucket.resize(b_size);
         bottom_bucket.resize(b_size);

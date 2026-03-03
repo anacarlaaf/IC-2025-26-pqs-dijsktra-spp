@@ -10,7 +10,7 @@ struct _1lv_bucket_queue_DK{
     int a = 0, r = 0, sz=0;
     keyType c = 0;
 
-    _1lv_bucket_queue_DK(int c_, int n){
+    _1lv_bucket_queue_DK(keyType c_, int n){
         // Inicia o 1-level bucket queue
         c = c_ + 1;
         nbuckets = c;
@@ -21,8 +21,7 @@ struct _1lv_bucket_queue_DK{
     void clear() {
         a = 0, r = 0, c=0, sz=0;
         nbuckets = -1;
-        b.clear();
-        ptr.clear();
+        for(auto &l : b) l.clear();
     }
     
     void insert(int u, keyType du, keyType w) {
@@ -51,6 +50,7 @@ struct _1lv_bucket_queue_DK{
         keyType du = r * nbuckets + a;
         b[a].pop_front();
         sz--;
+        ptr[u] = b[0].end();
         return make_pair(du, u);
     }
  
@@ -62,6 +62,7 @@ struct _1lv_bucket_queue_DK{
         if(ptr[u] != b[0].end()){
             int id = old_du % nbuckets;
             b[id].erase(ptr[u]);
+            ptr[u] = b[0].end();
             sz--;
         }
         insert(u, new_du, w);
@@ -76,8 +77,7 @@ struct _1lv_bucket_queue{
     int a = 0, r = 0, sz=0;
     keyType c = 0;
 
-    _1lv_bucket_queue(int c_, int n){
-        // Inicia o 1-level bucket queue
+    _1lv_bucket_queue(keyType c_){
         c = c_ + 1;
         nbuckets = c;
         b.assign(nbuckets, {});
@@ -86,7 +86,7 @@ struct _1lv_bucket_queue{
     void clear() {
         a = 0, r = 0, c=0, sz=0;
         nbuckets = -1;
-        b.clear();
+        for(auto &l : b) while(!l.empty()) l.pop();
     }
     
     void insert(int u, keyType du, keyType w) {

@@ -3,43 +3,22 @@
 #include "bits/stdc++.h"
 using namespace std;
 
-//g++ -std=c++20 main.cpp -o main
-
-enum PQS {
-    RBT,
-    FIBH,
-    BINH,
-    _1LVBQ1,
-    _1LVBQ2,
-    _2LVBQ1,
-    _2LVBQ2,
-    _4LVBQ,
-    _KLVBQ,
-};
-
-map<string, PQS> toPq = {
-    {"RBT", RBT},
-    {"FIBH", FIBH},
-    {"BINH", BINH},
-    {"1LVBQ1", _1LVBQ1},
-    {"1LVBQ2", _1LVBQ2},
-    {"2LVBQ1", _2LVBQ1},
-    {"2LVBQ2", _2LVBQ2},
-    {"4LVBQ", _4LVBQ},
-    {"KLVBQ", _KLVBQ}
-};
+// g++ -std=c++20 main.cpp -o main
 
 pq create_pq(PQS q, int n, keyType c, int k=0) {
     switch(q) {
+        case BINHCPP : return new binheapCPP();
         case BINH: return new binheap(n);
         case RBT: return new rb_tree();
         case FIBH: return new fibonacci(n);
-        case _1LVBQ1 : return new _1lvbq1(c);
-        case _1LVBQ2 : return new _1lvbq2(c, n);
-        case _2LVBQ1 : return new _2lvbq1(c);
-        case _2LVBQ2 : return new _2lvbq2(c, n);
-        case _4LVBQ : return new _4lvbq(c, n);
-        case _KLVBQ : return new _klvbq(c, n, k);
+        case _1LVBQ : return new _1lvbq(c);
+        case _2LVBQ : return new _2lvbq(c);
+        case _4LVBQ : return new _4lvbq(c);
+        case _KLVBQ : return new _klvbq(c, k);
+        case _1LVBQDK : return new _1lvbqDK(c, n);
+        case _2LVBQDK : return new _2lvbqDK(c, n);
+        case _4LVBQDK : return new _4lvbqDK(c, n);
+        case _KLVBQDK : return new _klvbqDK(c, n, k);
         default: return nullptr;
     }
 }
@@ -47,29 +26,36 @@ pq create_pq(PQS q, int n, keyType c, int k=0) {
 void exp(){
 
     timer otimer;
-    vector<string> pqs = {"BINH", "1LVBH1", "2LVBH1"};
-    vector<string> input = {"NY", "BAY", "COL", "CTR", "FLA"};
 
-    string data = "input.txt";
-    string hps = "heaps.txt";
+    // 1. Ler e definir filas e grafos ----------------
 
-    // ifstream file_data(data);
-    // ifstream file_pqs(hps);
+    vector<string> pqs;
+    vector<string> inputs;
 
-    // string line;
-    // while(getline(file_data, line)){
-    //     istringstream iss(line);
-    //     string s;
-    //     iss >> s;
-    //     pqs.push_back(toPq[s]);
-    // }
+    string inputsFile = "input.txt";
+    string pqsFile = "heaps.txt";
 
-    // while(getline(file_pqs, line)){
-    //     istringstream iss(line);
-    //     string s;
-    //     iss >> s;
-    //     input.push_back(s);
-    // }
+    ifstream file_data(inputsFile);
+    ifstream file_pqs(pqsFile);
+
+    string line;
+    while(getline(file_data, line)){
+        istringstream iss(line);
+        string s;
+        iss >> s;
+        inputs.push_back(s);
+    }
+
+    while(getline(file_pqs, line)){
+        istringstream iss(line);
+        string s;
+        iss >> s;
+        pqs.push_back(s);
+    }
+
+    // -----------------------------------------------
+
+    // 2. Formatar arquivo de saída dos resultados----
 
     string output = "../data/outs/time.csv";
 
@@ -86,9 +72,14 @@ void exp(){
     fileO << "\n";
     fileO.flush();
 
-    for (string f : input){
+    // ------------------------------------------------
+
+    // 3. Experimentos --------------------------------
+
+    for (string f : inputs){
         
-        // Abre arquivo
+        // Abre o arquivo
+
         string filename = "../data/txts/"+f+".txt";
         ifstream file(filename);
         if (!file.is_open()) {
@@ -96,18 +87,18 @@ void exp(){
             continue;
         }
 
-        // Lê quantidade de vértices e arestas
         string line;
         getline(file, line);
         istringstream iss(line);
         int qtd_ver, qtd_edges;
-        iss >> qtd_ver >> qtd_edges;
+        iss >> qtd_ver >> qtd_edges; // quantidade de vértices e arestas
 
         keyType max_weight = -1;
         graph g;
         g.resize(qtd_ver + 1);
 
-        // Lê arestas
+        // Lê grafo
+
         while (getline(file, line)) {
             istringstream iss(line);
             int a, b;
@@ -124,41 +115,52 @@ void exp(){
         }
         file.close();
 
+        // Output no arquivo de saída
+
         fileO << f << " " <<  qtd_ver << " " << qtd_edges <<  " " << max_weight << " ";
         fileO.flush();
 
-        // Grafo
+        // Output no terminal
+
         cout << "\nNome: " << f << "\n";
         cout << "Vértices: " << qtd_ver << "\n";
         cout << "Arestas: " << qtd_edges << "\n";
         cout << "Maior peso: " << max_weight << "\n";
 
-        cout << "Fila                 Tempo de execução\n";
+        cout << "\nFila                 Tempo de execução\n";
 
         int elap_sum = 0;
 
         // Experimentos
-        bool dk = false, both=false;
+
+        // Gabarito (usa fila de prioridade do C++ para comparar resultados)
+
+        shortest_path gabarito;
+        pq pq_cpp = create_pq(BINHCPP, qtd_ver, max_weight, 6);
+        gabarito.init_dijkstra(pq_cpp, qtd_ver, 0, false);
+        gabarito.dijkstra_ndk(g, pq_cpp);
+
         for(string s : pqs) {
             
             PQS p = toPq[s];
-            if (p==RBT or p==FIBH or p==_1LVBQ2 or p==_2LVBQ2 or p==_KLVBQ or p==_4LVBQ) dk = true;
-            else dk = false;
+            bool dk=false;
+            for(PQS pq : {RBT, FIBH, _1LVBQDK, _2LVBQDK, _4LVBQDK, _KLVBQDK}) if (p==pq) dk=true;
 
             shortest_path sp;
             elap_sum = 0;
             for(int i = 0; i < 10; i++) {
-                pq q = create_pq(p, qtd_ver, max_weight, 6);
+                pq q = create_pq(p, qtd_ver, max_weight, 4);
                 if(!q) continue;
 
-                otimer.start();
 
                 if(dk){
+                    otimer.start();
                     sp.init_dijkstra(q, qtd_ver, 0, dk);
                     sp.dijkstra_dk(g, q);
                     otimer.stop();
                 }
                 else{
+                    otimer.start();
                     sp.init_dijkstra(q, qtd_ver, 0, dk);
                     sp.dijkstra_ndk(g, q);
                     otimer.stop();
@@ -166,8 +168,15 @@ void exp(){
 
                 elap_sum += otimer.elapsed();
                 
-                delete q;
                 sp.clear();
+                delete q;
+            }
+
+            for(int i=0;i<qtd_ver;i++){ // verifica as distâncias calculadas estão corretas
+                if(gabarito.dist[i]!=sp.dist[i]){
+                    cerr << "\nERRO: distâncias calculadas com a fila " << s << " incorretas.\n";
+                    exit(1);
+                }
             }
 
             float elap_avg = elap_sum / 10.00;

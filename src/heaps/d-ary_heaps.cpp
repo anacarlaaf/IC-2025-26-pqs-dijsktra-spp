@@ -1,16 +1,5 @@
-#include <vector>
-#include <queue>
-#include <set>
-#include <chrono>
-#include <fstream>
-#include <sstream>
-#include <string>
-#include <cmath>
-#include <list>
-#include <assert.h>
-#include <cstring>
-#include "fibonacci_heap.cpp"
-#include "radix_heap.h"
+#include <bits/stdc++.h>
+#include "../../utils/define.hpp"
 
 using namespace std;
 

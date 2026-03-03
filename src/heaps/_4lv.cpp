@@ -25,31 +25,35 @@ struct _4lv_bucket_queue_DK{
     };
  
     void insert(int v, keyType dist, keyType w){
-        ll level0 = dist / size[3] % size[0]; // equivale a (dist/size[0]) % size[0]
-        ll level1 = dist / size[2] % size[0];
-        ll level2 = dist / size[1] % size[0];
-        ll level3 = dist % size[0];
         sz++;
 
-        if(level0 != act[0]) {
-            bucket[0][level0].push_back({dist, v});
+        ll level = dist / size[3] % size[0];
+        if(level != act[0]) {
+            bucket[0][level].push_back({dist, v});
             ptr[v].lvl = 0;
-            ptr[v].idx = level0;
-            ptr[v].it = prev(bucket[0][level0].end());
+            ptr[v].idx = level;
+            ptr[v].it = prev(bucket[0][level].end());
             actLv[0]++;
+            return;
         }
-        else if (level1 != act[1]){
-            bucket[1][level1].push_back({dist, v});
+        
+        level = dist / size[2] % size[0];
+        if (level != act[1]){
+            bucket[1][level].push_back({dist, v});
             ptr[v].lvl = 1;
-            ptr[v].idx = level1;
-            ptr[v].it = prev(bucket[1][level1].end());
+            ptr[v].idx = level;
+            ptr[v].it = prev(bucket[1][level].end());
             actLv[1]++;
+            return;
         }
-        else if (level2 != act[2] || level3 < act[3]){
-            bucket[2][level2].push_back({dist, v});
+        
+        level = dist / size[1] % size[0];
+        ll level3 = dist % size[0];
+        if (level != act[2] || level3 < act[3]){
+            bucket[2][level].push_back({dist, v});
             ptr[v].lvl = 2;
-            ptr[v].idx = level2;
-            ptr[v].it = prev(bucket[2][level2].end());
+            ptr[v].idx = level;
+            ptr[v].it = prev(bucket[2][level].end());
             actLv[2]++;
         }
         else{
@@ -124,7 +128,7 @@ struct _4lv_bucket_queue_DK{
 
     void clear(){
         for(int i=0;i<4;i++) {
-            bucket[i].clear();
+            for (auto &l : bucket[i]) l.clear();
             actLv[i] = 0;
             act[i] = 0;
         }
@@ -154,7 +158,7 @@ struct _4lv_bucket_queue{
     int sz;
  
     // inicia os buckets
-    _4lv_bucket_queue(keyType c, int n){                  // c = maior peso
+    _4lv_bucket_queue(keyType c){                  // c = maior peso
         int sqrtSize = pow(c + 1.0, 0.25);
         size[0] = sqrtSize; // potência de 2
         for(int i=0;i<4;i++) bucket[i].resize(size[0], {});
@@ -167,22 +171,26 @@ struct _4lv_bucket_queue{
     };
  
     void insert(int v, keyType dist, keyType w){
-        ll level0 = dist / size[3] % size[0]; // equivale a (dist/size[0]) % size[0]
-        ll level1 = dist / size[2] % size[0];
-        ll level2 = dist / size[1] % size[0];
-        ll level3 = dist % size[0];
         sz++;
 
-        if(level0 != act[0]) {
-            bucket[0][level0].push({dist, v});
+        ll level = dist / size[3] % size[0]; // equivale a (dist/size[0]) % size[0]
+        if(level != act[0]) {
+            bucket[0][level].push({dist, v});
             actLv[0]++;
+            return;
         }
-        else if (level1 != act[1]){
-            bucket[1][level1].push({dist, v});
+        
+        level = dist / size[2] % size[0];
+        if (level != act[1]){
+            bucket[1][level].push({dist, v});
             actLv[1]++;
+            return;
         }
-        else if (level2 != act[2] || level3 < act[3]){
-            bucket[2][level2].push({dist, v});
+        
+        level = dist / size[1] % size[0];
+        ll level3 = dist % size[0];
+        if (level != act[2] || level3 < act[3]){
+            bucket[2][level].push({dist, v});
             actLv[2]++;
         }
         else{
@@ -216,7 +224,6 @@ struct _4lv_bucket_queue{
         // distribuir até chegarem ao último nível
         for(int i=lv; i<3; i++){
             act[i+1] = size[0];
-            //cout << bucket[i].size() << " " << act[i] << endl;
             while(!bucket[i][act[i]].empty()){
                 par v = bucket[i][act[i]].front();
                 bucket[i][act[i]].pop();
@@ -249,7 +256,7 @@ struct _4lv_bucket_queue{
 
     void clear(){
         for(int i=0;i<4;i++) {
-            bucket[i].clear();
+            for (auto &q : bucket[i]) while (!q.empty()) q.pop();
             actLv[i] = 0;
             act[i] = 0;
         }
