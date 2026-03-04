@@ -1,7 +1,7 @@
-#include <vector>
+#include <bits/stdc++.h>
 using namespace std;
 
-typedef long long ll ;
+typedef unsigned long long ll ;
 typedef ll keyInt;
 typedef ll keyType;
 
@@ -27,6 +27,7 @@ enum PQS {
     RBT,
     FIBH,
     BINH,
+    RH,
     _1LVBQ,
     _2LVBQ,
     _4LVBQ,
@@ -41,6 +42,7 @@ map<string, PQS> toPq = {
     {"RBT", RBT},
     {"FIBH", FIBH},
     {"BINH", BINH},
+    {"RH", RH},
     {"1LVBQ", _1LVBQ},
     {"2LVBQ", _2LVBQ},
     {"4LVBQ", _4LVBQ},
@@ -48,7 +50,7 @@ map<string, PQS> toPq = {
     {"1LVBQDK", _1LVBQDK},
     {"2LVBQDK", _2LVBQDK},
     {"4LVBQDK", _4LVBQDK},
-    {"KLVBQDK", _KLVBQDK}
+    {"KLVBQDK", _KLVBQDK},
 };
 
 #endif

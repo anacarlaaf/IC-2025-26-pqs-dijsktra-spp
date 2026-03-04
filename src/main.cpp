@@ -11,6 +11,7 @@ pq create_pq(PQS q, int n, keyType c, int k=0) {
         case BINH: return new binheap(n);
         case RBT: return new rb_tree();
         case FIBH: return new fibonacci(n);
+        case RH: return new radixHeap();
         case _1LVBQ : return new _1lvbq(c);
         case _2LVBQ : return new _2lvbq(c);
         case _4LVBQ : return new _4lvbq(c);
@@ -57,7 +58,7 @@ void exp(){
 
     // 2. Formatar arquivo de saída dos resultados----
 
-    string output = "../data/outs/time.csv";
+    string output = "../data/outs/all_time.csv";
 
     ofstream fileO(output);
 
@@ -93,7 +94,7 @@ void exp(){
         int qtd_ver, qtd_edges;
         iss >> qtd_ver >> qtd_edges; // quantidade de vértices e arestas
 
-        keyType max_weight = -1;
+        keyType max_weight = 0;
         graph g;
         g.resize(qtd_ver + 1);
 

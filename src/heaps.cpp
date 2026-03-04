@@ -5,6 +5,7 @@
 #include "heaps/_4lv.cpp"
 #include "heaps/_klv.cpp"
 #include "heaps/bin_heap.cpp"
+#include "heaps/radix_heap.cpp"
 
 using namespace std;
 
@@ -186,6 +187,33 @@ struct _klvbq : heap_inter{
         cerr << "Estrutura sem suporte a decrease_key";
         exit(1);
     }
+};
+
+struct radixHeap : heap_inter{
+
+    radix_heap q;
+
+    void clear() {
+        q.clear();
+    } 
+    
+    void insert(int u, keyType du, keyType w) {
+        q.insert(u, du);
+    }
+ 
+    par extract_min() {
+        return q.extract_min();
+    }
+ 
+    bool empty() {
+        return q.empty();
+    }
+
+    void decrease_key(int u, keyType w, keyType old_du, keyType new_du){
+        cerr << "Estrutura sem suporte a decrease_key";
+        exit(1);
+    }
+ 
 };
 
 // Cem suporte a decrease_key
