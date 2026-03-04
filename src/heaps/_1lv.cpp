@@ -6,12 +6,11 @@ struct _1lv_bucket_queue_DK{
     vector<list<int>> b;
     vector<list<int>::iterator> ptr;
  
-    int nbuckets = -1;
+    int nbuckets = 0;
     int a = 0, r = 0, sz=0;
     keyType c = 0;
 
     _1lv_bucket_queue_DK(keyType c_, int n){
-        // Inicia o 1-level bucket queue
         c = c_ + 1;
         nbuckets = c;
         b.assign(nbuckets, {});
@@ -20,7 +19,7 @@ struct _1lv_bucket_queue_DK{
  
     void clear() {
         a = 0, r = 0, c=0, sz=0;
-        nbuckets = -1;
+        nbuckets = 0;
         for(auto &l : b) l.clear();
     }
     
@@ -85,7 +84,7 @@ struct _1lv_bucket_queue{
  
     void clear() {
         a = 0, r = 0, c=0, sz=0;
-        nbuckets = -1;
+        nbuckets = 0;
         for(auto &l : b) while(!l.empty()) l.pop();
     }
     

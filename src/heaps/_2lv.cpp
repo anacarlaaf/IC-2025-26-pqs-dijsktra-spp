@@ -118,14 +118,17 @@ struct _2lv_bucket_queue{
     // inicia os buckets
     
     _2lv_bucket_queue(keyType c){                  // c = maior peso
+        ll aux = 1;
         b_size = sqrt(c + 1) + 1; // quantidade de buckets
+        while(aux < b_size) aux <<=1;
+        b_size = aux;
         top_bucket.resize(b_size);
         bottom_bucket.resize(b_size);
     };
  
     void insert(int v, keyType dist, keyType w){
-        ll i =  dist / b_size % b_size; // se i = top bucket ativo, insere no bottom
-        ll j = dist % b_size;            // se não, insere no top
+        ll i =  (dist / b_size) & (b_size-1); // se i = top bucket ativo, insere no bottom
+        ll j = dist & (b_size-1);            // se não, insere no top
     
         if (i == at && j >= ab) {
             bottom_bucket[j].push({dist,v});
@@ -158,7 +161,7 @@ struct _2lv_bucket_queue{
         for(int i=0;i<aux;i++){
             auto a = top_bucket[at].front(); top_bucket[at].pop();
             qtdA--;
-            ll nova_ab = a.first % b_size; // a.first % b_size;
+            ll nova_ab = a.first & (b_size-1); // a.first % b_size;
             ab = min(ab, nova_ab);
             bottom_bucket[nova_ab].push(a);  // insere no bottom bucket
             qtdB++;

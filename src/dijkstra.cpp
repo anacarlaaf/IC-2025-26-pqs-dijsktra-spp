@@ -15,7 +15,7 @@ struct shortest_path {
         pai = vector<int>(size, -1);
         dist[s] = 0;
         
-        if (q) q->clear();
+        //if (q) q->clear();
         q->insert(s, 0, 0);  
     }
 
