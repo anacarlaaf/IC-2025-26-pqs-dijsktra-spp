@@ -1,9 +1,11 @@
 #include<bits/stdc++.h>
+using namespace std;
+#include "../../utils/define.hpp"
 
 using namespace std;
 
 typedef struct node{
-    int key;
+    keyType key;
     int degree;
     node *parent;
     node *child;
