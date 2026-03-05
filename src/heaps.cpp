@@ -109,7 +109,7 @@ struct _2lvbq : heap_inter{
     
     _2lv_bucket_queue bq;
 
-    _2lvbq(keyType _c) : bq(_c) {}
+    _2lvbq(keyType _c, int n) : bq(_c, n) {}
 
     void clear() {
         bq.clear();

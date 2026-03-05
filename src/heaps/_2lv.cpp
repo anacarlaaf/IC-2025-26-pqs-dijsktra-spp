@@ -110,8 +110,24 @@ struct _2lv_bucket_queue_DK{
     }
 };
 
+
+struct cbuffer {
+    par *data;
+    int head = 0, tail = 0, cap;
+
+    cbuffer() : data(nullptr), cap(0) {}
+    cbuffer(int c) : cap(c), data(new par[c]) {}
+
+    void push(par x)         { data[tail++ % cap] = x; }
+    par  front()             { return data[head % cap]; }
+    void pop()               { head++; }
+    bool empty()             { return head == tail; }
+    int  size()              { return tail - head; }
+    void clear()             { head = tail = 0; }
+};
+
 struct _2lv_bucket_queue{
-    queue<par> *bucket;
+    cbuffer *bucket;
     //queue<par> *top_bucket, *bottom_bucket;
 
     int sz=0;
@@ -121,12 +137,14 @@ struct _2lv_bucket_queue{
 
     // inicia os buckets
     
-    _2lv_bucket_queue(keyType c){                  // c = maior peso
+    _2lv_bucket_queue(keyType c, int n){                  // c = maior peso
         b_size = sqrt(c + 1) + 1;
         ll aux = 1;
         while(aux < b_size) aux <<= 1;
         b_size = aux;
-        bucket = new queue<par>[2*b_size];
+        bucket = new cbuffer[2*b_size];
+        aux = ceil(n/b_size);
+        for(int i=0;i<2*b_size;i++) bucket[i] = cbuffer(n/b_size);
         tb = b_size;
         // top_bucket = new queue<par>[b_size];
         // bottom_bucket = new queue<par>[b_size];

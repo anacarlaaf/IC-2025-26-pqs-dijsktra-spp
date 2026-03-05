@@ -14,7 +14,7 @@ pq create_pq(PQS q, int n, keyType c, int k=0) {
         case FIBH: return new fibonacci(n);
         case RH: return new radixHeap();
         case _1LVBQ : return new _1lvbq(c);
-        case _2LVBQ : return new _2lvbq(c);
+        case _2LVBQ : return new _2lvbq(c, n);
         case _4LVBQ : return new _4lvbq(c);
         case _KLVBQ : return new _klvbq(c, k);
         case _1LVBQDK : return new _1lvbqDK(c, n);
