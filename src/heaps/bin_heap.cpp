@@ -4,10 +4,10 @@ using namespace std;
 
 struct bin_heap{
     int tam=0;
-    vector<par> pq;
+    par  *pq;
 
     bin_heap(int n){
-        pq = vector<par>(n);
+        pq = new par[n];
     };
 
     void corrigeSubindo(){
@@ -50,7 +50,6 @@ struct bin_heap{
         pq[0] = pq[tam-1];
         tam--;
         corrigeDescendo();
-        pq.pop_back();
         return menor;
     }
 
@@ -59,7 +58,6 @@ struct bin_heap{
     }
 
     void clear(){
-        pq.clear();
         tam = 0;
     }
 

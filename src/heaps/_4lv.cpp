@@ -3,19 +3,21 @@ using namespace std;
 #include "../../utils/define.hpp"
 
 struct _4lv_bucket_queue_DK{
-    vector<list<par>> bucket[4];
-    vector<nptr> ptr;
+    list<par> *bucket[4];
+    nptr *ptr;
     int actLv[4];
     ll size[4];
     ll act[4];         // bucket ativos
     int sz;
+    int n;
  
     // inicia os buckets
-    _4lv_bucket_queue_DK(keyType c, int n){                  // c = maior peso
-        int sqrtSize = pow(c + 1.0, 0.25);
+    _4lv_bucket_queue_DK(keyType c, int n_){                  // c = maior peso
+        n = n_;
+        int sqrtSize = pow(c + 1.0, 0.25)+1;
         size[0] = sqrtSize; // potência de 2
-        for(int i=0;i<4;i++) bucket[i].resize(size[0], {});
-        ptr.resize(n, {-1, -1, list<par>::iterator{}});
+        for(int i=0;i<4;i++) bucket[i] = new list<par>[size[0]];
+        ptr = new nptr[n]; for(int i=0;i<n;i++) ptr[i] = {-1, -1, list<par>::iterator{}};
         memset(act, 0, sizeof(act));
         memset(actLv, 0, sizeof(actLv));
         size[1] = size[0];
@@ -77,15 +79,13 @@ struct _4lv_bucket_queue_DK{
         while(lv>=0 && actLv[lv] <= 0) lv--;
 
         // atualiza bucket ativo
-        int b = act[lv];
-        do{
-            if(b >= size[0]) b = 0;
-            if(!bucket[lv][b].empty()) break;
-            b++;
-        } while(b!=act[lv]);
+        int start = act[lv];
+        int b = start;
+        do {
+            if (!bucket[lv][b].empty()) break;
+            b = (b + 1) % size[0];
+        } while (b != start);
         act[lv] = b;
-        assert(b < size[0]);
-        assert(!bucket[lv][b].empty());
 
         // distribuir até chegarem ao último nível
         for(int i=lv; i<3; i++){
@@ -128,10 +128,13 @@ struct _4lv_bucket_queue_DK{
 
     void clear(){
         for(int i=0;i<4;i++) {
-            for (auto &l : bucket[i]) l.clear();
+            for(int j=0;j<size[0];j++) bucket[i][j].clear();
             actLv[i] = 0;
             act[i] = 0;
         }
+
+        ptr = new nptr[n]; for(int i=0;i<n;i++) ptr[i] = {-1, -1, list<par>::iterator{}};
+        sz = 0;
     }
 
     void decrease_key(int u, keyType w, keyType old_du, keyType new_du){
@@ -151,7 +154,7 @@ struct _4lv_bucket_queue_DK{
 };
 
 struct _4lv_bucket_queue{
-    vector<queue<par>> bucket[4];
+    queue<par> *bucket[4];
     int actLv[4];
     ll size[4];
     ll act[4];         // bucket ativos
@@ -159,9 +162,9 @@ struct _4lv_bucket_queue{
  
     // inicia os buckets
     _4lv_bucket_queue(keyType c){                  // c = maior peso
-        int sqrtSize = pow(c + 1.0, 0.25);
-        size[0] = sqrtSize; // potência de 2
-        for(int i=0;i<4;i++) bucket[i].resize(size[0], {});
+        int sqrtSize = pow(c + 1.0, 0.25) + 1;
+        size[0] = sqrtSize;
+        for(int i=0;i<4;i++) bucket[i] = new queue<par>[size[0]];
         memset(act, 0, sizeof(act));
         memset(actLv, 0, sizeof(actLv));
         size[1] = size[0];
@@ -173,7 +176,7 @@ struct _4lv_bucket_queue{
     void insert(int v, keyType dist, keyType w){
         sz++;
 
-        ll level = dist / size[3] % size[0]; // equivale a (dist/size[0]) % size[0]
+        ll level = dist / size[3] % size[0];
         if(level != act[0]) {
             bucket[0][level].push({dist, v});
             actLv[0]++;
@@ -210,13 +213,12 @@ struct _4lv_bucket_queue{
         int lv = 2;
         while(lv>=0 && actLv[lv] <= 0) lv--;
 
-        // atualiza bucket ativo
-        int b = act[lv];
-        do{
-            if(b >= size[0]) b = 0;
-            if(!bucket[lv][b].empty()) break;
-            b++;
-        } while(b!=act[lv]);
+        int start = act[lv];
+        int b = start;
+        do {
+            if (!bucket[lv][b].empty()) break;
+            b = (b + 1) % size[0];
+        } while (b != start);
         act[lv] = b;
         assert(b < size[0]);
         assert(!bucket[lv][b].empty());
@@ -256,9 +258,10 @@ struct _4lv_bucket_queue{
 
     void clear(){
         for(int i=0;i<4;i++) {
-            for (auto &q : bucket[i]) while (!q.empty()) q.pop();
+            for(int j=0;j<size[0];j++) while(!bucket[i][j].empty()) bucket[i][j].pop();
             actLv[i] = 0;
             act[i] = 0;
         }
+        sz = 0;
     }
 };

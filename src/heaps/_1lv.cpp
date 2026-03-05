@@ -3,24 +3,25 @@ using namespace std;
 #include "../../utils/define.hpp"
  
 struct _1lv_bucket_queue_DK{
-    vector<list<int>> b;
-    vector<list<int>::iterator> ptr;
+    list<int> *b;
+    list<int>::iterator *ptr;
  
     int nbuckets = 0;
-    int a = 0, r = 0, sz=0;
+    int a = 0, r = 0, sz=0, n=0;
     keyType c = 0;
 
-    _1lv_bucket_queue_DK(keyType c_, int n){
+    _1lv_bucket_queue_DK(keyType c_, int n_){
         c = c_ + 1;
+        n = n_;
         nbuckets = c;
-        b.assign(nbuckets, {});
-        ptr.resize(n, b[0].end());
+        b = new list<int>[nbuckets];
+        ptr = new list<int>::iterator[n];
     };
  
     void clear() {
-        a = 0, r = 0, c=0, sz=0;
-        nbuckets = 0;
-        for(auto &l : b) l.clear();
+        for(int i=0;i<nbuckets;i++) b[i].clear();
+        for(int i=0;i<n;i++) ptr[i] = list<int>::iterator{};
+        a = 0, r = 0, sz=0;
     }
     
     void insert(int u, keyType du, keyType w) {
@@ -49,7 +50,7 @@ struct _1lv_bucket_queue_DK{
         keyType du = r * nbuckets + a;
         b[a].pop_front();
         sz--;
-        ptr[u] = b[0].end();
+        ptr[u] = list<int>::iterator{};
         return make_pair(du, u);
     }
  
@@ -58,10 +59,10 @@ struct _1lv_bucket_queue_DK{
     }
  
     void decrease_key(int u, keyType w, keyType old_du, keyType new_du){
-        if(ptr[u] != b[0].end()){
+        if(ptr[u] != list<int>::iterator{}){
             int id = old_du % nbuckets;
             b[id].erase(ptr[u]);
-            ptr[u] = b[0].end();
+            ptr[u] = list<int>::iterator{};
             sz--;
         }
         insert(u, new_du, w);
@@ -70,22 +71,21 @@ struct _1lv_bucket_queue_DK{
 };
 
 struct _1lv_bucket_queue{
-    vector<queue<int>> b;
+    queue<int> *b;
  
-    int nbuckets = -1;
+    int nbuckets = 0;
     int a = 0, r = 0, sz=0;
     keyType c = 0;
 
     _1lv_bucket_queue(keyType c_){
         c = c_ + 1;
         nbuckets = c;
-        b.assign(nbuckets, {});
+        b = new queue<int>[nbuckets];
     };
  
     void clear() {
-        a = 0, r = 0, c=0, sz=0;
-        nbuckets = 0;
-        for(auto &l : b) while(!l.empty()) l.pop();
+        for(int i=0;i<nbuckets;i++) while(!b[i].empty()) b[i].pop();
+        a = 0, r = 0, sz=0;
     }
     
     void insert(int u, keyType du, keyType w) {

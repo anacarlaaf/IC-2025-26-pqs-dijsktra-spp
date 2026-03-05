@@ -53,7 +53,7 @@ def plotar_grafico(df, pqs):
 
 def main():
     # Nome do arquivo de entrada
-    arquivo_entrada = 'data/outs/time.csv'  # Altere para o nome do seu arquivo
+    arquivo_entrada = 'data/outs/bqdkndk.csv'  # Altere para o nome do seu arquivo
     
     try:
         # Ler os dados

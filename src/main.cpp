@@ -4,6 +4,7 @@
 using namespace std;
 
 // g++ -std=c++20 main.cpp -o main
+// g++ -fsanitize=address,undefined -g -std=c++20 main.cpp -o main
 
 pq create_pq(PQS q, int n, keyType c, int k=0) {
     switch(q) {
@@ -140,6 +141,7 @@ void exp(){
         pq pq_cpp = create_pq(BINHCPP, qtd_ver, max_weight, 6);
         gabarito.init_dijkstra(pq_cpp, qtd_ver, 0, false);
         gabarito.dijkstra_ndk(g, pq_cpp);
+        delete pq_cpp;
 
         for(string s : pqs) {
             
@@ -150,9 +152,7 @@ void exp(){
             shortest_path sp;
             elap_sum = 0;
             for(int i = 0; i < 10; i++) {
-                pq q = create_pq(p, qtd_ver, max_weight, 4);
-                if(!q) continue;
-
+                pq q = create_pq(p, qtd_ver, max_weight, 6);
 
                 if(dk){
                     otimer.start();
@@ -189,6 +189,8 @@ void exp(){
         fileO.flush();
 
         cout << "\n------------------------------\n";
+
+        gabarito.clear();
     }
     fileO.close();
 }

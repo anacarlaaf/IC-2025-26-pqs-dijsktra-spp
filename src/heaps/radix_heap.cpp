@@ -2,7 +2,6 @@
 using namespace std;
 #include "../../utils/define.hpp"
 
-
 struct radix_heap{
     vector<par> b[65];
     int qtd_buckets = 65;

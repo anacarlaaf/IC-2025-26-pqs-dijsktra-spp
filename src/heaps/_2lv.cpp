@@ -3,20 +3,21 @@ using namespace std;
 #include "../../utils/define.hpp"
 
 struct _2lv_bucket_queue_DK{
-    vector<list<par>> top_bucket, bottom_bucket;
-    vector<list<par>::iterator> ptr;
+    list<par> *top_bucket, *bottom_bucket;
+    list<par>::iterator *ptr;
 
-    int qtdA = 0, qtdB = 0;
+    int qtdA = 0, qtdB = 0, n=0;
     ll at = 0, ab = 0; // at = top bucket ativo, ab = bottom bucket ativo
     ll b_size = 0;     // tamanho dos buckets
 
     // inicia os buckets
     
-    _2lv_bucket_queue_DK(keyType c, int n){                  // c = maior peso
+    _2lv_bucket_queue_DK(keyType c, int n_){                  // c = maior peso
+        n = n_;
         b_size = sqrt(c + 1) + 1; // quantidade de buckets
-        top_bucket.resize(b_size);
-        bottom_bucket.resize(b_size);
-        ptr.resize(n, list<par>::iterator{});
+        top_bucket = new list<par>[b_size];
+        bottom_bucket = new list<par>[b_size];
+        ptr = new list<par>::iterator[n];
     };
  
     void insert(int v, keyType dist, keyType w){
@@ -79,18 +80,20 @@ struct _2lv_bucket_queue_DK{
 
     void clear(){
         for(int i=0;i<b_size;i++){
-            while(!top_bucket[i].empty()) top_bucket[i].pop_front();
-            while(!bottom_bucket[i].empty()) bottom_bucket[i].pop_front();
+            top_bucket[i].clear();
+            bottom_bucket[i].clear();
         }
 
+        for(int i=0;i<n;i++) ptr[i] = list<par>::iterator{};
+
         qtdA = 0; qtdB = 0;
-        at = 0; ab = 0;
+        at = 0; ab = 0; 
     }
 
     void decrease_key(int u, keyType w, keyType old_du, keyType new_du){
         if(ptr[u] != list<par>::iterator{}){
             ll i = old_du / b_size % b_size;      // se i = top bucket ativo, ta em cima,
-            ll j = old_du % b_size;            // se não, tá em baixo
+            ll j = old_du % b_size;               // se não, tá em baixo
         
             if (i == at && j >= ab) {
                 bottom_bucket[j].erase(ptr[u]);
@@ -105,11 +108,10 @@ struct _2lv_bucket_queue_DK{
 
         insert(u, new_du, w);
     }
-
 };
 
 struct _2lv_bucket_queue{
-    vector<queue<par>> top_bucket, bottom_bucket;
+    queue<par> *top_bucket, *bottom_bucket;
 
     int qtdA = 0, qtdB = 0;
     ll at = 0, ab = 0; // at = top bucket ativo, ab = bottom bucket ativo
@@ -118,17 +120,14 @@ struct _2lv_bucket_queue{
     // inicia os buckets
     
     _2lv_bucket_queue(keyType c){                  // c = maior peso
-        ll aux = 1;
         b_size = sqrt(c + 1) + 1; // quantidade de buckets
-        while(aux < b_size) aux <<=1;
-        b_size = aux;
-        top_bucket.resize(b_size);
-        bottom_bucket.resize(b_size);
+        top_bucket = new queue<par>[b_size];
+        bottom_bucket = new queue<par>[b_size];
     };
  
     void insert(int v, keyType dist, keyType w){
-        ll i =  (dist / b_size) & (b_size-1); // se i = top bucket ativo, insere no bottom
-        ll j = dist & (b_size-1);            // se não, insere no top
+        ll i =  dist / b_size % b_size; // se i = top bucket ativo, insere no bottom
+        ll j = dist % b_size;            // se não, insere no top
     
         if (i == at && j >= ab) {
             bottom_bucket[j].push({dist,v});
@@ -161,7 +160,7 @@ struct _2lv_bucket_queue{
         for(int i=0;i<aux;i++){
             auto a = top_bucket[at].front(); top_bucket[at].pop();
             qtdA--;
-            ll nova_ab = a.first & (b_size-1); // a.first % b_size;
+            ll nova_ab = a.first % b_size; // a.first % b_size;
             ab = min(ab, nova_ab);
             bottom_bucket[nova_ab].push(a);  // insere no bottom bucket
             qtdB++;
