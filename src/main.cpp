@@ -13,14 +13,14 @@ pq create_pq(PQS q, int n, keyType c, int k=0) {
         case RBT: return new rb_tree();
         case FIBH: return new fibonacci(n);
         case RH: return new radixHeap();
-        case _1LVBQ : return new _1lvbq(c);
+        case _1LVBQ : return new _1lvbq(c, n);
         case _2LVBQ : return new _2lvbq(c, n);
-        case _4LVBQ : return new _4lvbq(c);
+        case _4LVBQ : return new _4lvbq(c, n);
         case _KLVBQ : return new _klvbq(c, k);
-        case _1LVBQDK : return new _1lvbqDK(c, n);
-        case _2LVBQDK : return new _2lvbqDK(c, n);
-        case _4LVBQDK : return new _4lvbqDK(c, n);
-        case _KLVBQDK : return new _klvbqDK(c, n, k);
+        // case _1LVBQDK : return new _1lvbqDK(c, n);
+        // case _2LVBQDK : return new _2lvbqDK(c, n);
+        // case _4LVBQDK : return new _4lvbqDK(c, n);
+        // case _KLVBQDK : return new _klvbqDK(c, n, k);
         default: return nullptr;
     }
 }

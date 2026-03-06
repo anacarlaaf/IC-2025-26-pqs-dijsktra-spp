@@ -81,7 +81,7 @@ struct _1lvbq : heap_inter{
     
     _1lv_bucket_queue bq;
 
-    _1lvbq(keyType _c) : bq(_c) {}
+    _1lvbq(keyType _c, int n) : bq(_c, n) {}
 
     void clear() {
         bq.clear();
@@ -137,7 +137,7 @@ struct _4lvbq : heap_inter{
     
     _4lv_bucket_queue bq;
 
-    _4lvbq(keyType _c) : bq(_c) {}
+    _4lvbq(keyType _c, int n) : bq(_c, n) {}
 
     void clear() {
         bq.clear();
@@ -273,110 +273,112 @@ struct fibonacci : heap_inter {
     }
 };
 
-struct _1lvbqDK : heap_inter{
+// Bucket heaps com suporte a DK
+
+// struct _1lvbqDK : heap_inter{
     
-    _1lv_bucket_queue_DK bq;
+//     _1lv_bucket_queue_DK bq;
 
-    _1lvbqDK(keyType _c, int n) : bq(_c, n) {}
+//     _1lvbqDK(keyType _c, int n) : bq(_c, n) {}
 
-    void clear() {
-        bq.clear();
-    }
+//     void clear() {
+//         bq.clear();
+//     }
     
-    void insert(int u, keyType du, keyType w) {
-       bq.insert(u, du, w);
-    }
+//     void insert(int u, keyType du, keyType w) {
+//        bq.insert(u, du, w);
+//     }
 
-    par extract_min() {
-        return bq.extract_min();
-    }
+//     par extract_min() {
+//         return bq.extract_min();
+//     }
 
-    bool empty() {
-        return bq.empty();
-    }
+//     bool empty() {
+//         return bq.empty();
+//     }
 
-    void decrease_key(int u, keyType w, keyType old_du, keyType new_du){
-        bq.decrease_key(u, w, old_du, new_du);
-    }
-};
+//     void decrease_key(int u, keyType w, keyType old_du, keyType new_du){
+//         bq.decrease_key(u, w, old_du, new_du);
+//     }
+// };
 
-struct _2lvbqDK : heap_inter{
+// struct _2lvbqDK : heap_inter{
     
-    _2lv_bucket_queue_DK bq;
+//     _2lv_bucket_queue_DK bq;
 
-    _2lvbqDK(keyType _c, int n) : bq(_c, n) {}
+//     _2lvbqDK(keyType _c, int n) : bq(_c, n) {}
 
-    void clear() {
-        bq.clear();
-    }
+//     void clear() {
+//         bq.clear();
+//     }
     
-    void insert(int u, keyType du, keyType w) {
-       bq.insert(u, du, w);
-    }
+//     void insert(int u, keyType du, keyType w) {
+//        bq.insert(u, du, w);
+//     }
 
-    par extract_min() {
-        return bq.extract_min();
-    }
+//     par extract_min() {
+//         return bq.extract_min();
+//     }
 
-    bool empty() {
-        return bq.empty();
-    }
+//     bool empty() {
+//         return bq.empty();
+//     }
 
-    void decrease_key(int u, keyType w, keyType old_du, keyType new_du){
-        bq.decrease_key(u, w, old_du, new_du);
-    }
-};
+//     void decrease_key(int u, keyType w, keyType old_du, keyType new_du){
+//         bq.decrease_key(u, w, old_du, new_du);
+//     }
+// };
 
-struct _4lvbqDK : heap_inter{
+// struct _4lvbqDK : heap_inter{
     
-    _4lv_bucket_queue_DK bq;
+//     _4lv_bucket_queue_DK bq;
 
-    _4lvbqDK(keyType _c, int n) : bq(_c, n) {}
+//     _4lvbqDK(keyType _c, int n) : bq(_c, n) {}
 
-    void clear() {
-        bq.clear();
-    }
+//     void clear() {
+//         bq.clear();
+//     }
     
-    void insert(int u, keyType du, keyType w) {
-       bq.insert(u, du, w);
-    }
+//     void insert(int u, keyType du, keyType w) {
+//        bq.insert(u, du, w);
+//     }
 
-    par extract_min() {
-        return bq.extract_min();
-    }
+//     par extract_min() {
+//         return bq.extract_min();
+//     }
 
-    bool empty() {
-        return bq.empty();
-    }
+//     bool empty() {
+//         return bq.empty();
+//     }
 
-    void decrease_key(int u, keyType w, keyType old_du, keyType new_du){
-        bq.decrease_key(u, w, old_du, new_du);
-    }
-};
+//     void decrease_key(int u, keyType w, keyType old_du, keyType new_du){
+//         bq.decrease_key(u, w, old_du, new_du);
+//     }
+// };
 
-struct _klvbqDK : heap_inter{
+// struct _klvbqDK : heap_inter{
     
-    _klv_bucket_queue_DK bq;
+//     _klv_bucket_queue_DK bq;
 
-    _klvbqDK(keyType _c, int n, int k) : bq(_c, n, k) {}
+//     _klvbqDK(keyType _c, int n, int k) : bq(_c, n, k) {}
 
-    void clear() {
-        bq.clear();
-    }
+//     void clear() {
+//         bq.clear();
+//     }
     
-    void insert(int u, keyType du, keyType w) {
-       bq.insert(u, du, w);
-    }
+//     void insert(int u, keyType du, keyType w) {
+//        bq.insert(u, du, w);
+//     }
 
-    par extract_min() {
-        return bq.extract_min();
-    }
+//     par extract_min() {
+//         return bq.extract_min();
+//     }
 
-    bool empty() {
-        return bq.empty();
-    }
+//     bool empty() {
+//         return bq.empty();
+//     }
 
-    void decrease_key(int u, keyType w, keyType old_du, keyType new_du){
-        bq.decrease_key(u, w, old_du, new_du);
-    }
-};
+//     void decrease_key(int u, keyType w, keyType old_du, keyType new_du){
+//         bq.decrease_key(u, w, old_du, new_du);
+//     }
+// };

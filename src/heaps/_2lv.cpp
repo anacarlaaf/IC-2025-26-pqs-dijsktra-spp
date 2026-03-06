@@ -2,189 +2,9 @@
 using namespace std;
 #include "../../utils/define.hpp"
 
-struct _2lv_bucket_queue_DK{
-    list<par> *top_bucket, *bottom_bucket;
-    list<par>::iterator *ptr;
-
-    int qtdA = 0, qtdB = 0, n=0;
-    ll at = 0, ab = 0; // at = top bucket ativo, ab = bottom bucket ativo
-    ll b_size = 0;     // tamanho dos buckets
-
-    // inicia os buckets
-    
-    _2lv_bucket_queue_DK(keyType c, int n_){                  // c = maior peso
-        n = n_;
-        b_size = sqrt(c + 1) + 1; // quantidade de buckets
-        top_bucket = new list<par>[b_size];
-        bottom_bucket = new list<par>[b_size];
-        ptr = new list<par>::iterator[n];
-    };
- 
-    void insert(int v, keyType dist, keyType w){
-        ll i =  dist / b_size % b_size;  // se i = top bucket ativo, insere no bottom
-        ll j = dist % b_size;            // se não, insere no top
-    
-        if (i == at && j >= ab) {
-            bottom_bucket[j].push_back({dist,v});
-            ptr[v] = prev(bottom_bucket[j].end());
-            qtdB++;
-        }
-        else{
-            top_bucket[i].push_back({dist,v});
-            ptr[v] = prev(top_bucket[i].end());
-            qtdA++;
-        }
-    }
- 
-    void update(){
-        // procura um bottom bucket não vazio
-        while(ab < b_size && bottom_bucket[ab].empty()) ab++;
-        if(ab < b_size) return;
-
-         
-        // expand: se nao encontrar, distribui elementos de outro top bucket
-        ll start = at;
-        do {
-            if(top_bucket[at].size()) break;
-            at++;
-            if(at == b_size) at = 0;
-        }  while(at != start);
-        if(!top_bucket[at].size()) return;
- 
-        // distribui no bottom_bucket apenas os atuais, ignorando as novas inserções 
-        int aux = top_bucket[at].size();
-        ab = b_size;
-        for(int i=0;i<aux;i++){
-            auto a = top_bucket[at].front(); top_bucket[at].pop_front();
-            qtdA--;
-            ll nova_ab = a.first % b_size; // a.first % b_size;
-            ab = min(ab, nova_ab);
-            bottom_bucket[nova_ab].push_back(a);  // insere no bottom bucket
-            ptr[a.second] = prev(bottom_bucket[nova_ab].end());
-            qtdB++;
-        }
-    }
- 
-    par extract_min(){
-        update();
-        par min_elem = bottom_bucket[ab].front();
-        bottom_bucket[ab].pop_front();
-        ptr[min_elem.second] = list<par>::iterator{};
-        qtdB--;
-        return min_elem;
-    }
- 
-    bool empty() {
-        return qtdA+qtdB == 0;
-    }
-
-    void clear(){
-        for(int i=0;i<b_size;i++){
-            top_bucket[i].clear();
-            bottom_bucket[i].clear();
-        }
-
-        for(int i=0;i<n;i++) ptr[i] = list<par>::iterator{};
-
-        qtdA = 0; qtdB = 0;
-        at = 0; ab = 0; 
-    }
-
-    void decrease_key(int u, keyType w, keyType old_du, keyType new_du){
-        if(ptr[u] != list<par>::iterator{}){
-            ll i = old_du / b_size % b_size;      // se i = top bucket ativo, ta em cima,
-            ll j = old_du % b_size;               // se não, tá em baixo
-        
-            if (i == at && j >= ab) {
-                bottom_bucket[j].erase(ptr[u]);
-                qtdB--;
-            }
-            else{
-                top_bucket[i].erase(ptr[u]);
-                qtdA--;
-            }
-            ptr[u] = list<par>::iterator{};
-        }
-
-        insert(u, new_du, w);
-    }
-};
-
-struct cbuffer { // usar no lugar de queue
-    par *data;
-    int head = 0, tail = 0, cap;
-
-    cbuffer() : data(nullptr), cap(0) {}
-    cbuffer(int c) : cap(c), data(new par[c]) {}
-
-    void push(par x)         { data[tail++ % cap] = x; }
-    par  front()             { return data[head % cap]; }
-    void pop()               { head++; }
-    bool empty()             { return head == tail; }
-    int  size()              { return tail - head; }
-    void clear()             { head = tail = 0; }
-};
-
-struct bitmask{ // usar para evitar percorrer buckets vazios
-    static const int W = 128;
-    unsigned __int128 *mask;
-    int n_masks;
-
-    void init(int b_size){
-        n_masks = (b_size + W - 1) / W; // teto
-        mask = new unsigned __int128[n_masks]();
-    }
-
-    inline void set(ll i){ // bucket tem elementos
-        mask[i/W] |= ((__int128)1 << (i%W));
-    }
-
-    inline void unset(ll i){ // bucket vazio
-        mask[i/W] &= ~((__int128)1 << (i%W));
-    }
-
-    inline bool is_set(ll i) { // verifica se bucket tem elementos
-        return (mask[i / W] >> (i % W)) & 1;
-    }
-
-    ll msb(ll from=0){ // "from" equivale ao bucket ativo do nível
-        ll w = from/W; // qual trecho da máscara
-        ll bit = from % W; // qual bit da máscara
-
-        __int128 m = mask[w] >> bit;
-        if(m) return w * W + bit + ctz128(m);
-        // trecho * 128 + bkt ativo + próximo bkt não-vazio
-
-        // se não achar, busca nos próximos trechos da máscara
-        for(ll i=w+1; i<n_masks;i++){
-            if(mask[i]) return i * W + ctz128(mask[i]);
-        }
-
-        return -1;
-    }
-
-    bool zero(){ // verifica se a máscara é 0 (nível vazio)
-        for(int i=0;i<n_masks;i++){
-            if (mask[i]!=0) return false;
-        }
-        return true;
-    }
-
-    static int ctz128(unsigned __int128 x) { // acha bit mais significativo
-        uint64_t lo = (uint64_t)x;           // pega os 64 bits inferiores
-        if (lo) return __builtin_ctzll(lo);  // se tem bit setado embaixo, responde direto
-        return 64 + __builtin_ctzll((uint64_t)(x >> 64));  // senão, olha os 64 superiores
-    }
-
-    void clear() {
-        memset(mask, 0, n_masks * sizeof(__int128));
-    }
-
-};
-
 struct _2lv_bucket_queue{
     cbuffer *bucket; // 2 arrays de buckets alocados em um mesmo array
-    bitmask bm[2];
+    //queue<par> *top_bucket, *bottom_bucket;
 
     int sz=0;
     ll at = 0, ab = 0; // at = top bucket ativo, ab = bottom bucket ativo
@@ -198,9 +18,8 @@ struct _2lv_bucket_queue{
         while(aux < b_size) aux <<= 1;
         b_size = aux;
         bucket = new cbuffer[2*b_size];
+        aux = ceil(n/b_size);
         for(int i=0;i<2*b_size;i++) bucket[i] = cbuffer(n/b_size);
-        bm[0].init(b_size);
-        bm[1].init(b_size);
     };
  
     void insert(int v, keyType dist, keyType w){
@@ -209,32 +28,29 @@ struct _2lv_bucket_queue{
     
         if (i == at && j >= ab) {
             bucket[b_size+j].push({dist,v});
-            bm[1].set(j); // set do bit para indicar que o bucket tem elemento
         }
         else{
             bucket[i].push({dist,v});
-            bm[0].set(i);
         }
         sz++;
     }
  
     void update(){
         // procura um bottom bucket não vazio
-        if (bm[1].is_set(ab)) return;
-        ll next = bm[1].msb(ab);
-        if(next != -1){
-            ab = next;
-            return;
-        }
+        while(ab < b_size && bucket[b_size+ab].empty()) ab++;
+        if(ab < b_size) return;
+
          
-        // expand: se nao encontrar, distribui elementos do top bucket
-        next = bm[0].msb(at);
-        if(next == -1) next = bm[0].msb(0); // circular
-        if(next == -1) return; // não achou
-        at = next;
-
-
-        // distribui no bottom_bucket 
+        // expand: se nao encontrar, distribui elementos de outro top bucket
+        ll start = at;
+        do {
+            if(bucket[at].size()) break;
+            at++;
+            if(at == b_size) at = 0;
+        }  while(at != start);
+        if(!bucket[at].size()) return;
+ 
+        // distribui no bottom_bucket apenas os atuais, ignorando as novas inserções 
         int aux = bucket[at].size();
         ab = b_size;
         for(int i=0;i<aux;i++){
@@ -242,9 +58,7 @@ struct _2lv_bucket_queue{
             ll nova_ab = a.first & (b_size-1); // a.first % b_size;
             ab = min(ab, nova_ab);
             bucket[b_size+nova_ab].push(a);  // insere no bottom bucket
-            bm[1].set(nova_ab);
         }
-        bm[0].unset(at);
     }
  
     par extract_min(){
@@ -252,7 +66,6 @@ struct _2lv_bucket_queue{
         par min_elem = bucket[b_size+ab].front();
         bucket[b_size+ab].pop();
         sz--;
-        if(bucket[b_size+ab].empty()) bm[1].unset(ab); // zera bit pois se o bucket ficou vazio
         return min_elem;
     }
  
@@ -265,9 +78,6 @@ struct _2lv_bucket_queue{
             while(!bucket[i].empty()) bucket[i].pop();
             while(!bucket[b_size+i].empty()) bucket[b_size+i].pop();
         }
-
-        bm[0].clear();
-        bm[1].clear();
 
         at = 0; ab = 0; sz=0;
     }
