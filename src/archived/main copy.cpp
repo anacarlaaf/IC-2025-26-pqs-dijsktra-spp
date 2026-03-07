@@ -10,7 +10,6 @@ pq create_pq(PQS q, int n, keyType c, int k=0) {
     switch(q) {
         case BINHCPP : return new binheapCPP();
         case BINH: return new binheap(n);
-        case _4AH: return new _4ary_heap(n);
         case RBT: return new rb_tree();
         case FIBH: return new fibonacci(n);
         case RH: return new radixHeap();
@@ -29,7 +28,6 @@ pq create_pq(PQS q, int n, keyType c, int k=0) {
 void exp(){
 
     timer otimer;
-    CacheStats cache;
 
     // 1. Ler e definir filas e grafos ----------------
 
@@ -66,7 +64,14 @@ void exp(){
     ofstream fileO(output);
 
     fileO << fixed << setprecision(6);
-    fileO <<"nome n m c fila run l1 l2 llc cycles\n";
+    fileO <<"nome n m c ";
+    fileO.flush();
+
+    for (string p : pqs){
+        fileO << p << " ";
+        fileO.flush();
+    }
+    fileO << "\n";
     fileO.flush();
 
     // ------------------------------------------------
@@ -112,15 +117,21 @@ void exp(){
         }
         file.close();
 
-        // Log
+        // Output no arquivo de saída
+
+        fileO << f << " " <<  qtd_ver << " " << qtd_edges <<  " " << max_weight << " ";
+        fileO.flush();
+
+        // Output no terminal
 
         cout << "\nNome: " << f << "\n";
         cout << "Vértices: " << qtd_ver << "\n";
         cout << "Arestas: " << qtd_edges << "\n";
         cout << "Maior peso: " << max_weight << "\n";
-        cout << "Carregando..." << "\n";
 
-        int elap;
+        cout << "\nFila                 Tempo de execução\n";
+
+        int elap_sum = 0;
 
         // Experimentos
 
@@ -139,34 +150,28 @@ void exp(){
             for(PQS pq : {RBT, FIBH, _1LVBQDK, _2LVBQDK, _4LVBQDK, _KLVBQDK}) if (p==pq) dk=true;
 
             shortest_path sp;
+            elap_sum = 0;
             for(int i = 0; i < 10; i++) {
                 pq q = create_pq(p, qtd_ver, max_weight, 6);
 
                 if(dk){
-                    cache.start();
                     otimer.start();
                     sp.init_dijkstra(q, qtd_ver, 0, dk);
                     sp.dijkstra_dk(g, q);
                     otimer.stop();
-                    cache.stop();
                 }
                 else{
-                    cache.start();
                     otimer.start();
                     sp.init_dijkstra(q, qtd_ver, 0, dk);
                     sp.dijkstra_ndk(g, q);
                     otimer.stop();
-                    cache.stop();
                 }
 
-                elap = otimer.elapsed();
-                fileO << f << " " <<  qtd_ver << " " << qtd_edges <<  " " << max_weight << " " << s << " " << elap << 
-                " " << cache.r_l1 << " " << cache.r_l2 << " " << cache.r_llc << " " << cache.r_cycles << "\n";
+                elap_sum += otimer.elapsed();
                 
                 sp.clear();
                 delete q;
             }
-            fileO.flush();
 
             for(int i=0;i<qtd_ver;i++){ // verifica as distâncias calculadas estão corretas
                 if(gabarito.dist[i]!=sp.dist[i]){
@@ -174,7 +179,14 @@ void exp(){
                     exit(1);
                 }
             }
+
+            float elap_avg = elap_sum / 10.00;
+            printf("%-20s %10.6f ms\n", s.c_str(), elap_avg);
+            fileO << elap_avg << " ";
+            fileO.flush();
         }
+        fileO << "\n";
+        fileO.flush();
 
         cout << "\n------------------------------\n";
 

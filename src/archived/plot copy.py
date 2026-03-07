@@ -18,9 +18,9 @@ def ler_dados(arquivo_entrada):
                 # Converte valores numéricos
                 linha_dict = {}
                 for i, valor in enumerate(valores):
-                    if i in [1, 2, 3]:  # n, m, c são inteiros
+                    if i in [1, 2, 3, 5]:  # n, m, c são inteiros
                         linha_dict[cabecalho[i]] = int(valor)
-                    elif i >= 4:  # Tempos são floats
+                    elif i == 6:  # Tempos são floats
                         linha_dict[cabecalho[i]] = float(valor)
                     else:  # Nome é string
                         linha_dict[cabecalho[i]] = valor

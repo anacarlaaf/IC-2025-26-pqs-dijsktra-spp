@@ -39,7 +39,7 @@ struct bin_heap{
         }
     }
 
-    void insert(int u, keyType du, keyType w){
+    void insert(int u, keyType du){
         pq[tam] = (make_pair(du,u));
         tam++;
         corrigeSubindo();

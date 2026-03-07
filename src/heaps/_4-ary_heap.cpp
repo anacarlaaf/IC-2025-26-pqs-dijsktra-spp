@@ -1,65 +1,75 @@
-#include <bits/stdc++.h>
+#include<bits/stdc++.h>
+using namespace std;
 #include "../../utils/define.hpp"
 
-using namespace std;
+struct quad_heap{
+    int tam = 0;
+    par *pq;
 
-struct _4Ary_heap{
-    int B = 4;
-    vector<par> pq;
-
-    _4Ary_heap(int n){
-        pq.reserve(n);  // só reserva capacidade
+    quad_heap(int n){
+        pq = new par[n];
     }
 
-    void corrigeSubindo(int i){
-        while(i > 0){
-            int p = (i - 1) / B;
-            if(pq[p].first <= pq[i].first) break;
-            swap(pq[p], pq[i]);
-            i = p;
+    void corrigeSubindo(){
+        int i = tam - 1;
+        par aux;
+
+        while(i >= 1 && pq[(i-1)>>2].first > pq[i].first){
+            aux = pq[(i-1)>>2];
+            pq[(i-1)>>2] = pq[i];
+            pq[i] = aux;
+
+            i = (i-1)>>2;
         }
     }
 
-    void corrigeDescendo(int j){
-        int tam = pq.size();
-        while(true){
-            int first = B * j + 1;
-            if(first >= tam) break;
+    void corrigeDescendo(){
+        int j = 0, f, first_child;
+        par aux;
 
-            int best = first;
-            int last = min(first + B - 1, tam - 1);
+        while((j<<2) + 1 < tam){
 
-            for(int k = first + 1; k <= last; k++){
-                if(pq[k].first < pq[best].first)
-                    best = k;
+            first_child = (j<<2) + 1;
+            f = first_child;
+
+            for(int k=1;k<4;k++){
+                int child = first_child + k;
+                if(child < tam && pq[child].first < pq[f].first)
+                    f = child;
             }
 
-            if(pq[j].first <= pq[best].first) break;
+            if(pq[j].first <= pq[f].first){
+                j = tam;
+            }
+            else{
+                aux = pq[j];
+                pq[j] = pq[f];
+                pq[f] = aux;
 
-            swap(pq[j], pq[best]);
-            j = best;
+                j = f;
+            }
         }
     }
 
     void insert(int u, keyType du){
-        pq.emplace_back(du, u);
-        corrigeSubindo(pq.size() - 1);
+        pq[tam] = make_pair(du,u);
+        tam++;
+        corrigeSubindo();
     }
 
     par extract_min(){
         par menor = pq[0];
-        pq[0] = pq.back();
-        pq.pop_back();
-        if(!pq.empty())
-            corrigeDescendo(0);
+        pq[0] = pq[tam-1];
+        tam--;
+        corrigeDescendo();
         return menor;
     }
 
     bool empty(){
-        return pq.empty();
+        return tam == 0;
     }
 
     void clear(){
-        pq.clear();
+        tam = 0;
     }
 };
