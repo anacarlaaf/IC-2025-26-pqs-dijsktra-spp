@@ -21,6 +21,10 @@ struct bin_heap{
         }
     }
 
+    ~bin_heap(){
+        delete[] pq;
+    };
+
     void corrigeDescendo(){
         int j = 0, f;
         par aux;

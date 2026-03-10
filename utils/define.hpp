@@ -89,6 +89,82 @@ struct cbuffer { // usar no lugar de queue<>
     void clear()  { head = tail = 0; }
 };
 
+struct bkt{
+    int tail, sz;
+};
+
+struct element{
+    par data;
+    int prev, prox;
+};
+
+struct pool_list{
+
+    element *pool;
+    int *free_list;
+    int *idxs;
+    int free_top;
+
+    pool_list() : free_list(nullptr), idxs(nullptr), free_top(0) {}
+    pool_list(int c) {
+        pool = new element[c];
+        free_list = new int[c];
+        idxs = new int[c];
+        for(int i=0;i<c;i++) {
+            free_list[i] = i; // todos livre;
+            idxs[i] = -1;
+        }
+        free_top = c-1;
+    }
+
+    int alocar(par novo){
+        int idx = free_list[free_top--];
+        pool[idx].data = novo;
+        pool[idx].prev = pool[idx].prox = -1;;
+        return idx;
+    }
+    
+    int insert(par novo, int cauda){ 
+        int idx =  alocar(novo);
+        idxs[novo.second] = idx;
+        if (cauda!=-1) {
+            pool[cauda].prox = idx;
+            pool[idx].prev = cauda;
+        }
+        return idx; // retorna nova cauda;
+    }
+
+        int pop(int cauda){
+            int ant = pool[cauda].prev;
+
+            if (ant != -1) {
+                pool[ant].prox = -1;
+            }
+
+            free_top++;
+            free_list[free_top] = cauda;
+
+            return ant;
+        }
+
+    void remove(int u){
+        int idx = idxs[u];
+        int ant = pool[idx].prev;
+        int next = pool[idx].prox;
+
+        if (ant != -1) pool[ant].prox = next;
+        if (next != -1) pool[next].prev = ant;
+
+        free_top++;
+        free_list[free_top] = idx;
+        idxs[u] = -1;
+    }
+
+    void clear(int n) {
+        for(int i = 0; i < n; i++) { free_list[i] = i; idxs[i] = -1; }
+        free_top = n - 1;
+    }
+};
 
 struct bitmask{ // usar para evitar percorrer buckets vazios
     static const int W = 128;

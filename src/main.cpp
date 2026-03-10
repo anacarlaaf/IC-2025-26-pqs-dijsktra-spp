@@ -1,8 +1,9 @@
 #include "dijkstra.cpp"
-#include "../utils/perf.cpp"
+#include "../utils/perf.hpp"
 #include "bits/stdc++.h"
 using namespace std;
 
+// sudo sysctl -w kernel/perf_event_paranoid=1 (pra permitir ler cache miss)
 // g++ -std=c++20 main.cpp -o main
 // g++ -fsanitize=address,undefined -g -std=c++20 main.cpp -o main
 
@@ -18,10 +19,10 @@ pq create_pq(PQS q, int n, keyType c, int k=0) {
         case _2LVBQ : return new _2lvbq(c, n);
         case _4LVBQ : return new _4lvbq(c, n);
         case _KLVBQ : return new _klvbq(c, k);
-        // case _1LVBQDK : return new _1lvbqDK(c, n);
-        // case _2LVBQDK : return new _2lvbqDK(c, n);
-        // case _4LVBQDK : return new _4lvbqDK(c, n);
-        // case _KLVBQDK : return new _klvbqDK(c, n, k);
+        case _1LVBQDK : return new _1lvbqDK(c, n);
+        case _2LVBQDK : return new _2lvbqDK(c, n);
+        case _4LVBQDK : return new _4lvbqDK(c, n);
+        //case _KLVBQDK : return new _klvbqDK(c, n, k);
         default: return nullptr;
     }
 }
@@ -184,6 +185,10 @@ void exp(){
 }
 
 int main() {
+    timer tot_timer;
+    tot_timer.start();
     exp();
+    tot_timer.stop();
+    cout << "\nTempo total de execução: " << tot_timer.elapsed() << "\n";
     return 0;
 }

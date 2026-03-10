@@ -1,12 +1,12 @@
 #include "bits/stdc++.h"
-#include "heaps/fibonacci_heap.cpp"
-#include "heaps/_1lv.cpp"
-#include "heaps/_2lv.cpp"
-#include "heaps/_4lv.cpp"
-#include "heaps/_klv.cpp"
-#include "heaps/bin_heap.cpp"
-#include "heaps/radix_heap.cpp"
-#include "heaps/_4-ary_heap.cpp"
+#include "heaps/fibonacci_heap.hpp"
+#include "heaps/_1lv.hpp"
+#include "heaps/_2lv.hpp"
+#include "heaps/_4lv.hpp"
+#include "heaps/_klv.hpp"
+#include "heaps/bin_heap.hpp"
+#include "heaps/_4-ary_heap.hpp"
+#include "heaps/radix_heap.h"
 
 using namespace std;
 
@@ -221,18 +221,20 @@ struct _klvbq : heap_inter{
 
 struct radixHeap : heap_inter{
 
-    radix_heap q;
+    radix_heap::pair_radix_heap<keyType, int> q;
 
     void clear() {
         q.clear();
     } 
     
     void insert(int u, keyType du, keyType w) {
-        q.insert(u, du);
+        q.emplace(du, u);
     }
  
     par extract_min() {
-        return q.extract_min();
+        par ans = {q.top_key(), q.top_value()};
+        q.pop();
+        return ans;
     }
  
     bool empty() {
@@ -243,7 +245,6 @@ struct radixHeap : heap_inter{
         cerr << "Estrutura sem suporte a decrease_key";
         exit(1);
     }
- 
 };
 
 // Cem suporte a decrease_key
@@ -305,86 +306,86 @@ struct fibonacci : heap_inter {
 
 // Bucket heaps com suporte a DK
 
-// struct _1lvbqDK : heap_inter{
+struct _1lvbqDK : heap_inter{
     
-//     _1lv_bucket_queue_DK bq;
+    _1lv_bucket_queue_DK bq;
 
-//     _1lvbqDK(keyType _c, int n) : bq(_c, n) {}
+    _1lvbqDK(keyType _c, int n) : bq(_c, n) {}
 
-//     void clear() {
-//         bq.clear();
-//     }
+    void clear() {
+        bq.clear();
+    }
     
-//     void insert(int u, keyType du, keyType w) {
-//        bq.insert(u, du, w);
-//     }
+    void insert(int u, keyType du, keyType w) {
+       bq.insert(u, du, w);
+    }
 
-//     par extract_min() {
-//         return bq.extract_min();
-//     }
+    par extract_min() {
+        return bq.extract_min();
+    }
 
-//     bool empty() {
-//         return bq.empty();
-//     }
+    bool empty() {
+        return bq.empty();
+    }
 
-//     void decrease_key(int u, keyType w, keyType old_du, keyType new_du){
-//         bq.decrease_key(u, w, old_du, new_du);
-//     }
-// };
+    void decrease_key(int u, keyType w, keyType old_du, keyType new_du){
+        bq.decrease_key(u, w, old_du, new_du);
+    }
+};
 
-// struct _2lvbqDK : heap_inter{
+struct _2lvbqDK : heap_inter{
     
-//     _2lv_bucket_queue_DK bq;
+    _2lv_bucket_queue_DK bq;
 
-//     _2lvbqDK(keyType _c, int n) : bq(_c, n) {}
+    _2lvbqDK(keyType _c, int n) : bq(_c, n) {}
 
-//     void clear() {
-//         bq.clear();
-//     }
+    void clear() {
+        bq.clear();
+    }
     
-//     void insert(int u, keyType du, keyType w) {
-//        bq.insert(u, du, w);
-//     }
+    void insert(int u, keyType du, keyType w) {
+       bq.insert(u, du, w);
+    }
 
-//     par extract_min() {
-//         return bq.extract_min();
-//     }
+    par extract_min() {
+        return bq.extract_min();
+    }
 
-//     bool empty() {
-//         return bq.empty();
-//     }
+    bool empty() {
+        return bq.empty();
+    }
 
-//     void decrease_key(int u, keyType w, keyType old_du, keyType new_du){
-//         bq.decrease_key(u, w, old_du, new_du);
-//     }
-// };
+    void decrease_key(int u, keyType w, keyType old_du, keyType new_du){
+        bq.decrease_key(u, w, old_du, new_du);
+    }
+};
 
-// struct _4lvbqDK : heap_inter{
+struct _4lvbqDK : heap_inter{
     
-//     _4lv_bucket_queue_DK bq;
+    _4lv_bucket_queue_DK bq;
 
-//     _4lvbqDK(keyType _c, int n) : bq(_c, n) {}
+    _4lvbqDK(keyType _c, int n) : bq(_c, n) {}
 
-//     void clear() {
-//         bq.clear();
-//     }
+    void clear() {
+        bq.clear();
+    }
     
-//     void insert(int u, keyType du, keyType w) {
-//        bq.insert(u, du, w);
-//     }
+    void insert(int u, keyType du, keyType w) {
+       bq.insert(u, du, w);
+    }
 
-//     par extract_min() {
-//         return bq.extract_min();
-//     }
+    par extract_min() {
+        return bq.extract_min();
+    }
 
-//     bool empty() {
-//         return bq.empty();
-//     }
+    bool empty() {
+        return bq.empty();
+    }
 
-//     void decrease_key(int u, keyType w, keyType old_du, keyType new_du){
-//         bq.decrease_key(u, w, old_du, new_du);
-//     }
-// };
+    void decrease_key(int u, keyType w, keyType old_du, keyType new_du){
+        bq.decrease_key(u, w, old_du, new_du);
+    }
+};
 
 // struct _klvbqDK : heap_inter{
     

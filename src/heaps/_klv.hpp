@@ -30,7 +30,7 @@ struct _klv_bucket_queue{
             act[i]    = 0;
             actLv[i]  = 0;
             bucket[i] = new cbuffer[sqrtSize];
-            for(int j=0;j<size[0];j++) bucket[i][j] = cbuffer(n/sqrtSize);
+            for(int j=0;j<size[0];j++) bucket[i][j] = cbuffer(10);
             if(i > 0) {
                 size[i] = aux;
                 aux *= size[0];
@@ -39,6 +39,15 @@ struct _klv_bucket_queue{
 
         sz = 0;
     };
+
+    ~_klv_bucket_queue() {
+        for(int i = 0; i < lv; i++)
+            delete[] bucket[i];
+        delete[] bucket;
+        delete[] actLv;
+        delete[] size;
+        delete[] act;
+    }
  
     void insert(int v, keyType dist, keyType w){
         sz++;

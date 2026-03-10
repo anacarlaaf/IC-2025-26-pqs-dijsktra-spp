@@ -10,6 +10,10 @@ struct quad_heap{
         pq = new par[n];
     }
 
+    ~quad_heap() {
+        delete[] pq;
+    }
+
     void corrigeSubindo(){
         int i = tam - 1;
         par aux;
