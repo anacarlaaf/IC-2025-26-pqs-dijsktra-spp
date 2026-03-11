@@ -164,17 +164,18 @@ void exp(){
                 fileO << f << " " <<  qtd_ver << " " << qtd_edges <<  " " << max_weight << " " << s << " " << elap << 
                 " " << cache.r_l1 << " " << cache.r_l2 << " " << cache.r_llc << " " << cache.r_cycles << "\n";
                 
+                if (i == 0) {
+                    for(int j = 0; j < qtd_ver; j++){
+                        if(gabarito.dist[j] != sp.dist[j]){
+                            cerr << "\nERRO: distâncias calculadas com a fila " << s << " incorretas.\n";
+                            exit(1);
+                        }
+                    }
+                }
                 sp.clear();
                 delete q;
             }
             fileO.flush();
-
-            for(int i=0;i<qtd_ver;i++){ // verifica as distâncias calculadas estão corretas
-                if(gabarito.dist[i]!=sp.dist[i]){
-                    cerr << "\nERRO: distâncias calculadas com a fila " << s << " incorretas.\n";
-                    exit(1);
-                }
-            }
         }
 
         cout << "\n------------------------------\n";

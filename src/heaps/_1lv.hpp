@@ -72,6 +72,12 @@ struct _1lv_bucket_queue_DK{
         b = new list<int>[b_size];
         ptr = new list<int>::iterator[n];
     };
+
+    ~_1lv_bucket_queue_DK() {
+        delete[] b;
+        delete[] ptr;
+    }
+ 
  
     void clear() {
         for(int i=0;i<b_size;i++) b[i].clear();

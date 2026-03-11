@@ -151,6 +151,13 @@ struct _4lv_bucket_queue_DK{
         size[3] = size[2]*size[0];
         sz = 0;
     };
+
+    ~_4lv_bucket_queue_DK() {
+        for(int i=0;i<4;i++) {
+            delete[] bucket[i];
+        }
+        delete[] ptr;
+    }
  
     void insert(int v, keyType dist, keyType w){
         sz++;
@@ -259,7 +266,7 @@ struct _4lv_bucket_queue_DK{
             act[i] = 0;
         }
 
-        ptr = new nptr[n]; for(int i=0;i<n;i++) ptr[i] = {-1, -1, list<par>::iterator{}};
+        for(int i=0;i<n;i++) ptr[i] = {-1, -1, list<par>::iterator{}};
         sz = 0;
     }
 
