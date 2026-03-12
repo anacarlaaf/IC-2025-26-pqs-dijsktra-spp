@@ -18,7 +18,7 @@ pq create_pq(PQS q, int n, keyType c, int k=0) {
         case _1LVBQ : return new _1lvbq(c, n);
         case _2LVBQ : return new _2lvbq(c, n);
         case _4LVBQ : return new _4lvbq(c, n);
-        case _KLVBQ : return new _klvbq(c, k);
+        // case _KLVBQ : return new _klvbq(c, k);
         case _1LVBQDK : return new _1lvbqDK(c, n);
         case _2LVBQDK : return new _2lvbqDK(c, n);
         case _4LVBQDK : return new _4lvbqDK(c, n);
@@ -67,7 +67,7 @@ void exp(){
     ofstream fileO(output);
 
     fileO << fixed << setprecision(6);
-    fileO <<"nome n m c fila run l1 l2 llc cycles\n";
+    fileO <<"nome n m c fila run l1 l2 llc cycles inst\n";
     fileO.flush();
 
     // ------------------------------------------------

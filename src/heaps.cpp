@@ -3,7 +3,7 @@
 #include "heaps/_1lv.hpp"
 #include "heaps/_2lv.hpp"
 #include "heaps/_4lv.hpp"
-#include "heaps/_klv.hpp"
+// #include "heaps/_klv.hpp"
 #include "heaps/bin_heap.hpp"
 #include "heaps/_4-ary_heap.hpp"
 #include "heaps/radix_heap.h"
@@ -191,33 +191,33 @@ struct _4lvbq : heap_inter{
     }
 };
 
-struct _klvbq : heap_inter{
+// struct _klvbq : heap_inter{
     
-    _klv_bucket_queue bq;
+//     _klv_bucket_queue bq;
 
-    _klvbq(keyType _c, int k) : bq(_c, k) {}
+//     _klvbq(keyType _c, int k) : bq(_c, k) {}
 
-    void clear() {
-        bq.clear();
-    }
+//     void clear() {
+//         bq.clear();
+//     }
     
-    void insert(int u, keyType du, keyType w) {
-       bq.insert(u, du, w);
-    }
+//     void insert(int u, keyType du, keyType w) {
+//        bq.insert(u, du, w);
+//     }
 
-    par extract_min() {
-        return bq.extract_min();
-    }
+//     par extract_min() {
+//         return bq.extract_min();
+//     }
 
-    bool empty() {
-        return bq.empty();
-    }
+//     bool empty() {
+//         return bq.empty();
+//     }
 
-    void decrease_key(int u, keyType w, keyType old_du, keyType new_du){
-        cerr << "Estrutura sem suporte a decrease_key";
-        exit(1);
-    }
-};
+//     void decrease_key(int u, keyType w, keyType old_du, keyType new_du){
+//         cerr << "Estrutura sem suporte a decrease_key";
+//         exit(1);
+//     }
+// };
 
 struct radixHeap : heap_inter{
 

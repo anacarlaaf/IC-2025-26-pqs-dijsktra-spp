@@ -36,8 +36,9 @@ struct _1lv_bucket_queue{
         if (b[a].size()) return;
 
         int bg = a;
+        int aux = b_size-1;
         do {
-            a = (a + 1) & (b_size-1);
+            a = (a + 1) & (aux);
             if (b[a].size()) return;
         } while (a != bg);
 

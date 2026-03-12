@@ -32,8 +32,9 @@ struct _2lv_bucket_queue{
     }
  
     void insert(int v, keyType dist, keyType w){
-        ll i =  (dist / b_size) & (b_size-1); // se i = top bucket ativo, insere no bottom
-        ll j = dist & (b_size-1);            // se não, insere no top
+        ll aux = b_size-1;
+        ll i =  (dist / b_size) & (aux); // se i = top bucket ativo, insere no bottom
+        ll j = dist & (aux);            // se não, insere no top
     
         if (i == at && j >= ab) bucket[1][j].push({dist,v});
         else bucket[0][i].push({dist,v});
@@ -160,12 +161,13 @@ struct _2lv_bucket_queue_DK{
         // distribui no bottom_bucket apenas os atuais, ignorando as novas inserções 
         int aux = top_bucket[at].sz;
         ab = b_size;
+        int mod_b_size = b_size-1;
         for(int i=0;i<aux;i++){
             par a = pool.pool[top_bucket[at].tail].data; 
             top_bucket[at].tail = pool.pop(top_bucket[at].tail);
             top_bucket[at].sz--;
 
-            ll nova_ab = a.first & (b_size-1); // a.first % b_size;
+            ll nova_ab = a.first & (mod_b_size); // a.first % b_size;
             ab = min(ab, nova_ab);
             bottom_bucket[nova_ab].tail = pool.insert(a, bottom_bucket[nova_ab].tail);
             qBucket[a.second] = b_size+nova_ab;

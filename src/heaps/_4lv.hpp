@@ -5,8 +5,8 @@ using namespace std;
 struct _4lv_bucket_queue{
     cbuffer *bucket[4];
     int actLv[4];
-    ll size[4];
-    ll act[4];         // bucket ativos
+    int size[4];
+    int act[4];         // bucket ativos
     int sz;
  
     // inicia os buckets
@@ -17,14 +17,14 @@ struct _4lv_bucket_queue{
         size[0] = aux;
         for(int i=0;i<4;i++){
             bucket[i] = new cbuffer[aux];
-            for(int j=0;j<size[0];j++)
+            for(int j=0;j<aux;j++)
                 bucket[i][j] = cbuffer(n/aux);
         }
         memset(act, 0, sizeof(act));
         memset(actLv, 0, sizeof(actLv));
-        size[1] = size[0];
-        size[2] = size[0]*size[0];
-        size[3] = size[2]*size[0];
+        size[1] = aux;
+        size[2] = aux*aux;
+        size[3] = size[2]*aux;
         sz = 0;
     };
 
@@ -35,21 +35,22 @@ struct _4lv_bucket_queue{
     void insert(int v, keyType dist, keyType w){
         sz++;
 
-        ll level = (dist / size[3]) & (size[0]-1);
+        int aux = size[0]-1;
+        int level = (dist / size[3]) & (aux);
         if(level != act[0]) {
             bucket[0][level].push({dist, v});
             actLv[0]++;
             return;
         }
         
-        level = (dist / size[2]) & (size[0]-1);
+        level = (dist / size[2]) & (aux);
         if (level != act[1]){
             bucket[1][level].push({dist, v});
             actLv[1]++;
             return;
         }
         
-        level = (dist / size[1]) & (size[0]-1);
+        level = (dist / size[1]) & (aux);
         ll level3 = dist & (size[0]-1);
         if (level != act[2] || level3 < act[3]){
             bucket[2][level].push({dist, v});
@@ -74,9 +75,10 @@ struct _4lv_bucket_queue{
 
         int start = act[lv];
         int b = start;
+        int aux = size[0]-1;
         do {
             if (!bucket[lv][b].empty()) break;
-            b = (b + 1) & (size[0]-1);
+            b = (b + 1) & (aux);
         } while (b != start);
         act[lv] = b;
         assert(b < size[0]);
@@ -90,7 +92,7 @@ struct _4lv_bucket_queue{
                 bucket[i][act[i]].pop();
                 actLv[i]--;
 
-                ll novo = v.first & (size[0]-1);
+                int novo = v.first & (aux);
                 bucket[i+1][novo].push(v);
                 actLv[i+1]++;
                 act[i+1] = min(act[i+1], novo);
