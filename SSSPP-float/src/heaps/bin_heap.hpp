@@ -5,7 +5,7 @@ using namespace std;
 
 struct bin_heap{
     int tam=0;
-    vector<par> pq;
+    vector<parInt> pq;
 
     bin_heap() {}          
     bin_heap(int n) {      
@@ -15,7 +15,7 @@ struct bin_heap{
 
     void corrigeSubindo(){
         int i = tam-1;
-        par aux;
+        parInt aux;
         while(i>=1 && pq[(i-1)/2].first > pq[i].first){
             aux = pq[(i-1)/2];
             pq[(i-1)/2] = pq[i];
@@ -26,7 +26,7 @@ struct bin_heap{
 
     void corrigeDescendo(){
         int j = 0, f;
-        par aux;
+        parInt aux;
         while(2*j+1<tam){
             f = 2*j+1;
 
@@ -48,8 +48,8 @@ struct bin_heap{
         corrigeSubindo();
     }
 
-    par extract_min(){
-        par menor = pq[0];
+    parInt extract_min(){
+        parInt menor = pq[0];
         pq[0] = pq[tam-1];
         tam--;
         corrigeDescendo();
@@ -75,15 +75,15 @@ struct bin_heap{
 
 // struct bin_heap{
 //     int tam=0;
-//     par  *pq;
+//     parInt  *pq;
 
 //     bin_heap(int n){
-//         pq = new par[n];
+//         pq = new parInt[n];
 //     };
 
 //     void corrigeSubindo(){
 //         int i = tam-1;
-//         par aux;
+//         parInt aux;
 //         while(i>=1 && pq[(i-1)/2].first > pq[i].first){
 //             aux = pq[(i-1)/2];
 //             pq[(i-1)/2] = pq[i];
@@ -98,7 +98,7 @@ struct bin_heap{
 
 //     void corrigeDescendo(){
 //         int j = 0, f;
-//         par aux;
+//         parInt aux;
 //         while(2*j+1<tam){
 //             f = 2*j+1;
 
@@ -120,8 +120,8 @@ struct bin_heap{
 //         corrigeSubindo();
 //     }
 
-//     par extract_min(){
-//         par menor = pq[0];
+//     parInt extract_min(){
+//         parInt menor = pq[0];
 //         pq[0] = pq[tam-1];
 //         tam--;
 //         corrigeDescendo();

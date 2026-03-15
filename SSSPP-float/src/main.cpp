@@ -7,21 +7,13 @@ using namespace std;
 // g++ -std=c++20 main.cpp -o main
 // g++ -fsanitize=address,undefined -g -std=c++20 main.cpp -o main
 
-pq create_pq(PQS q, int n, keyType c, int k=0) {
+pq create_pq(PQS q, int n, keyType c, int k=0, keyType delta) {
     switch(q) {
         case BINHCPP : return new binheapCPP();
         case BINH: return new binheap(n);
-        case RBT: return new rb_tree();
-        case FIBH: return new fibonacci(n);
         case RH: return new radixHeap();
-        case _1LVBQ : return new _1lvbq(c, n);
-        case _2LVBQ : return new _2lvbq(c, n);
-        case _4LVBQ : return new _4lvbq(c, n);
-        // case _KLVBQ : return new _klvbq(c, k);
-        case _1LVBQDK : return new _1lvbqDK(c, n);
-        case _2LVBQDK : return new _2lvbqDK(c, n);
+        case _2LVBQDK : return new _2lvbqDK(c, n, delta);
         case _4LVBQDK : return new _4lvbqDK(c, n);
-        //case _KLVBQDK : return new _klvbqDK(c, n, k);
         default: return nullptr;
     }
 }
@@ -91,6 +83,7 @@ void exp(){
         iss >> qtd_ver >> qtd_edges; // quantidade de vértices e arestas
 
         keyType max_weight = 0;
+        keyType min_weight = numeric_limits<double>::max();
         graph g;
         g.resize(qtd_ver + 1);
 
@@ -108,6 +101,7 @@ void exp(){
                 g[b].push_back({c, a});
 
                 max_weight = max(max_weight, c);
+                min_weight = min(min_weight, c);
             }
         }
         file.close();

@@ -3,14 +3,14 @@ using namespace std;
 
 typedef unsigned long long ll ;
 typedef ll keyInt;
-typedef ll keyType;
+typedef double keyType;
 
 
 typedef pair<keyInt,int> parInt;
-typedef pair<keyType,int> par;
+typedef pair<ll, pair<keyType,int>> par;
 
 typedef vector<vector<parInt>> graphInt;
-typedef vector<vector<par>> graph;
+typedef vector<vector<parInt>> graph;
 
 
 #ifndef NPTR_DEFINED
@@ -92,7 +92,7 @@ struct pool_list{
     
     int insert(par novo, int cauda){ 
         int idx =  alocar(novo);
-        idxs[novo.second] = idx;
+        idxs[novo.second.second] = idx;
         if (cauda!=-1) {
             pool[cauda].prox = idx;
             pool[idx].prev = cauda;
@@ -109,7 +109,7 @@ struct pool_list{
 
         free_top++;
         free_list[free_top] = cauda;
-        idxs[pool[cauda].data.second] = -1;
+        idxs[pool[cauda].data.second.second] = -1;
 
         return ant;
     }
