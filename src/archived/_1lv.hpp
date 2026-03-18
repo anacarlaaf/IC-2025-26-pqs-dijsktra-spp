@@ -93,8 +93,7 @@ struct _1lv_bucket_queue_DK{
 
     void insert(int v, keyType dist, keyType w){
         ll id = (a+w) & (b_size-1);
-        bucket[id].tail = pool.insert({dist,v}, bucket[id].tail);
-        bucket[id].sz++;
+        pool.insert({dist,v}, &bucket[id]);
         qBucket[v] = id;
         sz++;
     }
@@ -116,7 +115,7 @@ struct _1lv_bucket_queue_DK{
     par extract_min(){
         update();
         par min_elem = pool.pool[bucket[a].tail].data;
-        bucket[a].tail = pool.pop(bucket[a].tail);
+        pool.pop(&bucket[a]);
         bucket[a].sz--;
         sz--;
         return min_elem;
@@ -143,11 +142,7 @@ struct _1lv_bucket_queue_DK{
         if(pool.idxs[u] != -1) {
             int k = qBucket[u];
             int idx = pool.idxs[u];
-
-            // Se u é o tail do bucket, atualiza o tail para o prev
-            if (bucket[k].tail == idx) bucket[k].tail = pool.pool[idx].prev;
-            bucket[k].sz--;
-            pool.remove(u);
+            pool.remove(u, &bucket[k]);
             sz--;
         }
         insert(u, new_du, w);

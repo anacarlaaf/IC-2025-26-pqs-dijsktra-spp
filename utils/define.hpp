@@ -27,15 +27,12 @@ enum PQS {
     RBT,
     FIBH,
     BINH,
-    _4AH,
     RH,
     _1LVBQ,
     _2LVBQ,
-    _4LVBQ,
     _KLVBQ,
     _1LVBQDK,
     _2LVBQDK,
-    _4LVBQDK,
     _KLVBQDK,
 };
 
@@ -43,15 +40,12 @@ map<string, PQS> toPq = {
     {"RBT", RBT},
     {"FIBH", FIBH},
     {"BINH", BINH},
-    {"4AH", _4AH},
     {"RH", RH},
     {"1LVBQ", _1LVBQ},
     {"2LVBQ", _2LVBQ},
-    {"4LVBQ", _4LVBQ},
     {"KLVBQ", _KLVBQ},
     {"1LVBQDK", _1LVBQDK},
     {"2LVBQDK", _2LVBQDK},
-    {"4LVBQDK", _4LVBQDK},
     {"KLVBQDK", _KLVBQDK},
 };
 
@@ -90,34 +84,41 @@ struct pool_list{
         return idx;
     }
     
-    int insert(par novo, int cauda){ 
+    void insert(par novo, bkt *cauda){ 
         int idx =  alocar(novo);
         idxs[novo.second] = idx;
-        if (cauda!=-1) {
-            pool[cauda].prox = idx;
-            pool[idx].prev = cauda;
+        int t = cauda->tail;
+        if (t!=-1) {
+            pool[t].prox = idx;
+            pool[idx].prev = t;
         }
-        return idx; // retorna nova cauda;
+        cauda->tail = idx;
+        cauda->sz++;
     }
 
-    int pop(int cauda){
-        int ant = pool[cauda].prev;
+    void pop(bkt *bucket){
+        int t = bucket->tail;
+        int ant = pool[t].prev;
 
         if (ant != -1) {
             pool[ant].prox = -1;
         }
 
         free_top++;
-        free_list[free_top] = cauda;
-        idxs[pool[cauda].data.second] = -1;
+        free_list[free_top] = t;
+        idxs[pool[t].data.second] = -1;
 
-        return ant;
+        bucket->tail = ant;
+        bucket->sz--;
     }
 
-    void remove(int u){
+    void remove(int u, bkt *bucket){
         int idx = idxs[u];
         int ant = pool[idx].prev;
         int next = pool[idx].prox;
+
+        if(bucket->tail == idx) bucket->tail = pool[idx].prev;
+        bucket->sz--;
 
         if (ant != -1) pool[ant].prox = next;
         if (next != -1) pool[next].prev = ant;
@@ -130,6 +131,12 @@ struct pool_list{
     void clear(int n) {
         for(int i = 0; i < n; i++) { free_list[i] = i; idxs[i] = -1; }
         free_top = n - 1;
+    }
+
+    void del(){
+        delete[] pool;
+        delete[] free_list;
+        delete[] idxs;
     }
 };
 

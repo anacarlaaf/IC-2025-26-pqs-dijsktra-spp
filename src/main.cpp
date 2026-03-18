@@ -11,17 +11,13 @@ pq create_pq(PQS q, int n, keyType c, int k=0) {
     switch(q) {
         case BINHCPP : return new binheapCPP();
         case BINH: return new binheap(n);
-        case RBT: return new rb_tree();
         case FIBH: return new fibonacci(n);
-        case RH: return new radixHeap();
         case _1LVBQ : return new _1lvbq(c, n);
         case _2LVBQ : return new _2lvbq(c, n);
-        case _4LVBQ : return new _4lvbq(c, n);
-        // case _KLVBQ : return new _klvbq(c, k);
+        case _KLVBQ : return new _klvbq(c, k);
         case _1LVBQDK : return new _1lvbqDK(c, n);
         case _2LVBQDK : return new _2lvbqDK(c, n);
-        case _4LVBQDK : return new _4lvbqDK(c, n);
-        //case _KLVBQDK : return new _klvbqDK(c, n, k);
+        case _KLVBQDK : return new _klvbqDK(c, n, k);
         default: return nullptr;
     }
 }
@@ -135,14 +131,20 @@ void exp(){
         delete pq_cpp;
 
         for(string s : pqs) {
-            
-            PQS p = toPq[s];
+            int tam = s.size();
+            PQS p;
+            if(s[0]-'0'>2){
+                if(s[tam-1]=='K') p = _KLVBQDK;
+                else p = _KLVBQ;
+            }
+            else p = toPq[s];
             bool dk=false;
-            for(PQS pq : {RBT, FIBH, _1LVBQDK, _2LVBQDK, _4LVBQDK, _KLVBQDK}) if (p==pq) dk=true;
+            if (p==FIBH || p==RBT || p==_KLVBQDK || p==_2LVBQDK || p==_1LVBQDK) dk=true;
+            char lv = s[0];
 
             shortest_path sp;
             for(int i = 0; i < 10; i++) {
-                pq q = create_pq(p, qtd_ver, max_weight, 6);
+                pq q = create_pq(p, qtd_ver, max_weight, lv-'0');
 
                 if(dk){
                     cache.start();
@@ -161,6 +163,7 @@ void exp(){
                     cache.stop();
                 }
 
+                if(s[0]=='K') s = '_'+lv+"BQTH";
                 elap = otimer.elapsed();
                 fileO << f << " " <<  qtd_ver << " " << qtd_edges <<  " " << max_weight << " " << s << " " << elap << 
                 " " << cache.r_l1 << " " << cache.r_l2 << " " << cache.r_llc << " " << cache.r_cycles << " " << cache.r_instructions << "\n";

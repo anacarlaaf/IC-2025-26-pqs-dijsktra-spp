@@ -1,11 +1,8 @@
 #include "bits/stdc++.h"
 #include "heaps/fibonacci_heap.hpp"
-#include "heaps/_1lv.hpp"
-#include "heaps/_2lv.hpp"
-#include "heaps/_4lv.hpp"
-// #include "heaps/_klv.hpp"
+#include "heaps/bucket_heaps_dk.hpp"
+#include "heaps/bucket_heaps_vector.hpp"
 #include "heaps/bin_heap.hpp"
-#include "heaps/radix_heap.h"
 
 using namespace std;
 
@@ -133,11 +130,11 @@ struct _2lvbq : heap_inter{
     }
 };
 
-struct _4lvbq : heap_inter{
+struct _klvbq : heap_inter{
     
-    _4lv_bucket_queue bq;
+    _klv_bucket_queue bq;
 
-    _4lvbq(keyType _c, int n) : bq(_c, n) {}
+    _klvbq(keyType _c, int k) : bq(_c, k) {}
 
     void clear() {
         bq.clear();
@@ -161,61 +158,6 @@ struct _4lvbq : heap_inter{
     }
 };
 
-// struct _klvbq : heap_inter{
-    
-//     _klv_bucket_queue bq;
-
-//     _klvbq(keyType _c, int k) : bq(_c, k) {}
-
-//     void clear() {
-//         bq.clear();
-//     }
-    
-//     void insert(int u, keyType du, keyType w) {
-//        bq.insert(u, du, w);
-//     }
-
-//     par extract_min() {
-//         return bq.extract_min();
-//     }
-
-//     bool empty() {
-//         return bq.empty();
-//     }
-
-//     void decrease_key(int u, keyType w, keyType old_du, keyType new_du){
-//         cerr << "Estrutura sem suporte a decrease_key";
-//         exit(1);
-//     }
-// };
-
-struct radixHeap : heap_inter{
-
-    radix_heap::pair_radix_heap<keyType, int> q;
-
-    void clear() {
-        q.clear();
-    } 
-    
-    void insert(int u, keyType du, keyType w) {
-        q.emplace(du, u);
-    }
- 
-    par extract_min() {
-        par ans = {q.top_key(), q.top_value()};
-        q.pop();
-        return ans;
-    }
- 
-    bool empty() {
-        return q.empty();
-    }
-
-    void decrease_key(int u, keyType w, keyType old_du, keyType new_du){
-        cerr << "Estrutura sem suporte a decrease_key";
-        exit(1);
-    }
-};
 
 // Cem suporte a decrease_key
 
@@ -274,7 +216,7 @@ struct fibonacci : heap_inter {
     }
 };
 
-// Bucket heaps com suporte a DK
+//Bucket heaps com suporte a DK
 
 struct _1lvbqDK : heap_inter{
     
@@ -330,11 +272,12 @@ struct _2lvbqDK : heap_inter{
     }
 };
 
-struct _4lvbqDK : heap_inter{
-    
-    _4lv_bucket_queue_DK bq;
 
-    _4lvbqDK(keyType _c, int n) : bq(_c, n) {}
+struct _klvbqDK : heap_inter{
+    
+    _klv_bucket_queue_DK bq;
+
+    _klvbqDK(keyType _c, int n, int k) : bq(_c, n, k) {}
 
     void clear() {
         bq.clear();
@@ -356,30 +299,3 @@ struct _4lvbqDK : heap_inter{
         bq.decrease_key(u, w, old_du, new_du);
     }
 };
-
-// struct _klvbqDK : heap_inter{
-    
-//     _klv_bucket_queue_DK bq;
-
-//     _klvbqDK(keyType _c, int n, int k) : bq(_c, n, k) {}
-
-//     void clear() {
-//         bq.clear();
-//     }
-    
-//     void insert(int u, keyType du, keyType w) {
-//        bq.insert(u, du, w);
-//     }
-
-//     par extract_min() {
-//         return bq.extract_min();
-//     }
-
-//     bool empty() {
-//         return bq.empty();
-//     }
-
-//     void decrease_key(int u, keyType w, keyType old_du, keyType new_du){
-//         bq.decrease_key(u, w, old_du, new_du);
-//     }
-// };
