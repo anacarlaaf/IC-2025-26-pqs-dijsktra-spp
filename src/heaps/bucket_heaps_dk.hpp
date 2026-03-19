@@ -15,7 +15,7 @@ struct _1lv_bucket_queue_DK{
     
     _1lv_bucket_queue_DK(keyType c, int n_){                  // c = maior peso
         n = n_;
-        b_size = sqrt(c + 1) + 1;
+        b_size = c;
         ll aux = 1;
         while(aux < b_size) aux <<= 1;
         b_size = aux;
