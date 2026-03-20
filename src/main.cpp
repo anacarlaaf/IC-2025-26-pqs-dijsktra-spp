@@ -132,15 +132,24 @@ void exp(){
         for(string s : pqs) {
             int tam = s.size();
             PQS p;
-            if(s[0]-'0'>2){
+            int lv_int = 1;
+            char lv = '1';
+            if(s.compare(1,4, "LVBQ")==0 && s[0]-'0'>2){
                 if(s[tam-1]=='K') p = _KLVBQDK;
                 else p = _KLVBQ;
+                char lv = s[0];
+                int lv_int = lv-'0';
             }
-            else p = toPq[s];
+            else {
+                auto it = toPq.find(s);
+                if (it == toPq.end()) {
+                    cerr << "Fila inválida: " << s << "\n";
+                    exit(1);
+                }
+                p = toPq[s];
+            }
             bool dk=false;
             if (p==FIBH || p==RBT || p==_KLVBQDK || p==_2LVBQDK || p==_1LVBQDK) dk=true;
-            char lv = s[0];
-            int lv_int = lv-'0';
             pq q;
 
             timer otimer;

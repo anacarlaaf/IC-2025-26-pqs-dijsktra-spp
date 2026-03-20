@@ -3,10 +3,3 @@ BAY
 CAL
 COL
 FLA
-LKS
-CTR
-E
-W
-NW
-NE
-USA
