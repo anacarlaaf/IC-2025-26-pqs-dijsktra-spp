@@ -24,9 +24,6 @@ pq create_pq(PQS q, int n, keyType c, int k=0) {
 
 void exp(){
 
-    timer otimer;
-    CacheStats cache;
-
     // 1. Ler e definir filas e grafos ----------------
 
     vector<string> pqs;
@@ -62,7 +59,7 @@ void exp(){
     ofstream fileO(output);
 
     fileO << fixed << setprecision(6);
-    fileO <<"nome n m c fila run l1 l2 llc cycles inst\n";
+    fileO <<"nome n m c fila cpu_time wall_time l1 l2 llc cycles inst tlb dtlb page_faults rss branch_inst branch_miss\n";
     fileO.flush();
 
     // ------------------------------------------------
@@ -116,11 +113,11 @@ void exp(){
         cout << "Maior peso: " << max_weight << "\n";
         cout << "Carregando..." << "\n";
 
-        int elap;
+        int elap_cpu, elap_wall;
 
         // Experimentos
 
-        // Gabarito (usa fila de prioridade do C++ para comparar resultados)
+        // Gabarito (usa fila de prioridade do C++ para comparar resultados) ----------
 
         int st = 10;
 
@@ -129,6 +126,8 @@ void exp(){
         gabarito.init_dijkstra(pq_cpp, qtd_ver, st, false);
         gabarito.dijkstra_ndk(g, pq_cpp);
         delete pq_cpp;
+
+        // ----------------------------------------------------------------------------
 
         for(string s : pqs) {
             int tam = s.size();
@@ -141,14 +140,18 @@ void exp(){
             bool dk=false;
             if (p==FIBH || p==RBT || p==_KLVBQDK || p==_2LVBQDK || p==_1LVBQDK) dk=true;
             char lv = s[0];
+            int lv_int = lv-'0';
+            pq q;
+
+            timer otimer;
+            CacheStats cache;
 
             shortest_path sp;
             for(int i = 0; i < 10; i++) {
-                pq q = create_pq(p, qtd_ver, max_weight, lv-'0');
-
                 if(dk){
                     cache.start();
                     otimer.start();
+                    q = create_pq(p, qtd_ver, max_weight, lv_int);
                     sp.init_dijkstra(q, qtd_ver, st, dk);
                     sp.dijkstra_dk(g, q);
                     otimer.stop();
@@ -157,6 +160,7 @@ void exp(){
                 else{
                     cache.start();
                     otimer.start();
+                    q = create_pq(p, qtd_ver, max_weight, lv_int);
                     sp.init_dijkstra(q, qtd_ver, st, dk);
                     sp.dijkstra_ndk(g, q);
                     otimer.stop();
@@ -164,10 +168,13 @@ void exp(){
                 }
 
                 if(s[0]=='K') s = '_'+lv+"BQTH";
-                elap = otimer.elapsed();
-                fileO << f << " " <<  qtd_ver << " " << qtd_edges <<  " " << max_weight << " " << s << " " << elap << 
-                " " << cache.r_l1 << " " << cache.r_l2 << " " << cache.r_llc << " " << cache.r_cycles << " " << cache.r_instructions << "\n";
-                
+                elap_cpu = otimer.elapsed_cpu_ms();
+                elap_wall = otimer.elapsed_wall_ms();
+
+                fileO << f << " " << qtd_ver << " " << qtd_edges << " " << max_weight << " " << s << " " << elap_cpu << " " << elap_wall << 
+                " " << cache.r_l1 << " " << cache.r_l2 << " " << cache.r_llc << " " << cache.r_cycles << " " << cache.r_instructions << " " << 
+                cache.r_dtlb << " " << cache.r_page_faults << " " << cache.r_rss_kb << " " << cache.r_branch_instr << " " << cache.r_branch_miss << "\n";
+
                 if (i == 0) {
                     for(int j = 0; j < qtd_ver; j++){
                         if(gabarito.dist[j] != sp.dist[j]){
@@ -194,6 +201,6 @@ int main() {
     tot_timer.start();
     exp();
     tot_timer.stop();
-    cout << "\nTempo total de execução: " << tot_timer.elapsed() << "\n";
+    cout << "\nTempo total de execução: " << tot_timer.elapsed_wall_ms() << "\n";
     return 0;
 }

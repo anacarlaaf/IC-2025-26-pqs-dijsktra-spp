@@ -48,6 +48,35 @@ struct shortest_path {
         }
     };
 
+    void dijkstra_dk_perf(const auto &adj, pq &q) {
+        while(!q->empty()) {
+            auto [du, u] = q->extract_min();
+    
+            for(auto [w, v] : adj[u]) {
+                if(dist[v] > dist[u] + w) {
+                    q->decrease_key(v, w, dist[v], dist[u]+w);
+                    pai[v] = u;
+                    dist[v] = dist[u] + w;
+                }
+            }
+        }
+    };
+
+    void dijkstra_ndk_perf(const auto &adj, pq &q) {
+        while(!q->empty()) {
+            auto [du, u] = q->extract_min();
+            if(dist[u] < du) continue;
+    
+            for(auto [w, v] : adj[u]) {
+                if(dist[v] > dist[u] + w) {
+                    pai[v] = u;
+                    dist[v] = dist[u] + w;
+                    q->insert(v, dist[v], w);
+                }
+            }
+        }
+    };
+
     void clear(){
         dist.clear();
         pai.clear();

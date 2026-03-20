@@ -2,7 +2,6 @@
 using namespace std;
 #include "../../utils/define.hpp"
 
-
 struct bin_heap{
     int tam=0;
     vector<par> pq;
@@ -11,7 +10,6 @@ struct bin_heap{
     bin_heap(int n) {      
         pq.reserve(n);     
     }
-
 
     void corrigeSubindo(){
         int i = tam-1;

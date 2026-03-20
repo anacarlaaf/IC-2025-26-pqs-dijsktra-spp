@@ -8,21 +8,13 @@ struct _1lv_bucket_queue{
     int b_size = 0;
     int a = 0, sz=0;
 
-    _1lv_bucket_queue(keyType c_, int n){
-        b_size = c_;
-        ll aux = 1;
-        while(aux < b_size) aux <<=1;
-        b_size = aux;
+    _1lv_bucket_queue(keyType c_, int n) {
+        b_size = 1 << (32 - __builtin_clz((int)c_));
         b = new vector<par>[b_size];
-    };
+    }
 
     ~_1lv_bucket_queue() {
         delete[] b;
-    }
- 
-    void clear() {
-        for(int i=0;i<b_size;i++) while(!b[i].empty()) b[i].pop_back();
-        a = 0, sz=0;
     }
     
     void insert(int u, keyType du, keyType w) {
@@ -66,15 +58,11 @@ struct _2lv_bucket_queue{
     ll b_size = 0;     // tamanho dos buckets
 
     // inicia os buckets
-    
-    _2lv_bucket_queue(keyType c, int n){                  // c = maior peso
-        b_size = sqrt(c + 1) + 1;
-        ll aux = 1;
-        while(aux < b_size) aux <<= 1;
-        b_size = aux;
+    _2lv_bucket_queue(keyType c, int n) {
+        b_size = 1 << ((32 - __builtin_clz((int)c)) / 2 + 1);
         bucket[0] = new vector<par>[b_size];
         bucket[1] = new vector<par>[b_size];
-    };
+    }
 
     ~_2lv_bucket_queue(){
         delete[] bucket[0];
@@ -131,15 +119,6 @@ struct _2lv_bucket_queue{
     bool empty() {
         return sz == 0;
     }
-
-    void clear(){
-        for(int i=0;i<b_size;i++){
-            while(!bucket[0][i].empty()) bucket[0][i].pop_back();
-            while(!bucket[1][i].empty()) bucket[1][i].pop_back();
-        }
-
-        at = 0; ab = 0; sz=0;
-    }
 };
 
 
@@ -150,33 +129,30 @@ struct _klv_bucket_queue{
     ll *act;    //     // bucket ativos
     int sz;
     int lv;
-    int n;
  
     // inicia os buckets
-    _klv_bucket_queue(keyType c, int k){                  // c = maior peso
+    _klv_bucket_queue(keyType c, int k) {
         lv = k;
-        int sqrtSize = pow(c + 1.0, 1.0/k) + 1;
-        ll aux = 1;
-        while(aux < sqrtSize) aux <<=1;
 
-        size   = new ll[k];
-        act    = new ll[k];
-        actLv  = new int[k];
+        // raiz k-ésima inteira de c, arredondada para cima
+        ll sqrtSize = (ll)pow((double)c + 1.0, 1.0 / k) + 2;
+        ll aux = 1;
+        while (aux < sqrtSize) aux <<= 1;
+
+        size   = new ll[k]();
+        act    = new ll[k]();
+        actLv  = new int[k]();
         bucket = new vector<par>*[k];
 
-        size[0] = aux;
-        for(int i=0;i<k;i++) {
-            act[i]    = 0;
-            actLv[i]  = 0;
-            bucket[i] = new vector<par>[size[0]];
-            if(i > 0) {
-                size[i] = aux;
-                aux *= size[0];
-            }
+        ll acc = aux;
+        for (int i = 0; i < k; i++) {
+            size[i]   = acc;
+            bucket[i] = new vector<par>[aux];
+            acc      *= aux;
         }
-
+        
         sz = 0;
-    };
+    }
 
     ~_klv_bucket_queue(){
         for(int i=0;i<lv;i++){
@@ -272,16 +248,6 @@ struct _klv_bucket_queue{
     bool empty() {
         if (sz) return false;
         return true;
-    }
-
-    void clear(){
-        for(int i = 0; i < lv; i++) {
-            for(int j = 0; j < size[0]; j++)
-                while(!bucket[i][j].empty()) bucket[i][j].pop_back();
-            actLv[i] = 0;
-            act[i]   = 0;
-        }
-        sz = 0;
     }
     
 };

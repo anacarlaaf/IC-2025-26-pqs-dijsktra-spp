@@ -13,20 +13,18 @@ struct _1lv_bucket_queue_DK{
 
     // inicia os buckets
     
-    _1lv_bucket_queue_DK(keyType c, int n_){                  // c = maior peso
-        n = n_;
-        b_size = c;
-        ll aux = 1;
-        while(aux < b_size) aux <<= 1;
-        b_size = aux;
-        bucket = new bkt[b_size];
-        qBucket = new int[n];
-        pool = pool_list(n);
-        for(int i=0;i<b_size;i++){
-            bucket[i].sz = 0;
-            bucket[i].tail = -1;
-        }
-    };
+    _1lv_bucket_queue_DK(keyType c, int n_) {
+        n     = n_;
+        b_size = 1 << (32 - __builtin_clz((int)c));
+        
+        bucket  = new bkt[b_size]();   // zero-init: sz=0, tail=0
+        qBucket = new int[n]();
+        pool    = pool_list(n);
+
+        // tail precisa ser -1, não 0
+        for (int i = 0; i < b_size; i++) bucket[i].tail = -1;
+        memset(qBucket, -1, sizeof(int) * n);
+    }
 
     ~_1lv_bucket_queue_DK() {
         delete[] bucket;
@@ -66,19 +64,6 @@ struct _1lv_bucket_queue_DK{
         return sz == 0;
     }
 
-    void clear(){
-        for(int i = 0; i < b_size; i++){
-            bucket[i].tail = -1;
-            bucket[i].sz = 0;
-        }
-
-        for(int i = 0; i < n; i++)
-            qBucket[i] = -1;
-
-        pool.clear(n);
-        a = sz = 0;
-    }
-
     void decrease_key(int u, keyType w, keyType old_du, keyType new_du){
         if(pool.idxs[u] != -1) {
             int k = qBucket[u];
@@ -100,21 +85,19 @@ struct _2lv_bucket_queue_DK{
 
     // inicia os buckets
     
-    _2lv_bucket_queue_DK(keyType c, int n_){                  // c = maior peso
-        n = n_;
-        b_size = sqrt(c + 1) + 1;
-        ll aux = 1;
-        while(aux < b_size) aux <<= 1;
-        b_size = aux;
-        top_bucket = new bkt[b_size];
-        bottom_bucket = new bkt[b_size];
-        qBucket = new int[n];
-        pool = pool_list(n);
-        for(int i=0;i<b_size;i++){
-            top_bucket[i].sz = bottom_bucket[i].sz = 0;
+    _2lv_bucket_queue_DK(keyType c, int n_) {
+        n      = n_;
+        b_size = 1 << ((32 - __builtin_clz((int)c)) / 2 + 1);
+
+        top_bucket    = new bkt[b_size]();
+        bottom_bucket = new bkt[b_size]();
+        qBucket       = new int[n]();
+        pool          = pool_list(n);
+
+        for (int i = 0; i < b_size; i++)
             top_bucket[i].tail = bottom_bucket[i].tail = -1;
-        }
-    };
+        memset(qBucket, -1, sizeof(int) * n);
+    }
 
     ~_2lv_bucket_queue_DK() {
         delete[] top_bucket;
@@ -180,15 +163,6 @@ struct _2lv_bucket_queue_DK{
         return sz == 0;
     }
 
-    void clear(){
-        for(int i = 0; i < b_size; i++){
-            top_bucket[i].tail = bottom_bucket[i].tail = -1;
-            top_bucket[i].sz = bottom_bucket[i].sz = 0;
-        }
-        pool.clear(n);
-        at = ab = sz = 0;
-    }
-
     void decrease_key(int u, keyType w, keyType old_du, keyType new_du){
         if(pool.idxs[u] != -1) {
             int k = qBucket[u];
@@ -217,38 +191,30 @@ struct _klv_bucket_queue_DK{
     int lv;
  
     // inicia os buckets
-    _klv_bucket_queue_DK(keyType c, int n_, int k){                  // c = maior peso
+    _klv_bucket_queue_DK(keyType c, int n_, int k) {
         lv = k;
-        int sqrtSize = pow(c + 1.0, 1.0/k) + 1;
+
         ll aux = 1;
-        while(aux < sqrtSize) aux <<=1;
+        while (aux < (ll)(pow((double)c + 1.0, 1.0/k) + 2)) aux <<= 1;
 
-        size   = new ll[k];
-        act    = new ll[k];
-        actLv  = new int[k];
-        bucket = new bkt*[k];
+        size    = new ll[k]();
+        act     = new ll[k]();
+        actLv   = new int[k]();
+        bucket  = new bkt*[k];
         qBucket = new pair<int,int>[n_];
-        pool = pool_list(n_);
+        pool    = pool_list(n_);
 
-        size[0] = aux;
-        for(int i=0;i<k;i++) {
-            act[i]    = 0;
-            actLv[i]  = 0;
-            bucket[i] = new bkt[size[0]];
-            if(i > 0) {
-                size[i] = aux;
-                aux *= size[0];
-            }
-
-            for(int j = 0; j < size[0]; j++){
-                bucket[i][j].sz   = 0;
-                bucket[i][j].tail = -1;
-            }
+        ll acc = aux;
+        for (int i = 0; i < k; i++) {
+            size[i]   = acc;
+            bucket[i] = new bkt[aux]();                        // sz=0, tail=0
+            for (int j = 0; j < aux; j++) bucket[i][j].tail = -1;
+            acc *= aux;
         }
 
-
+        memset(qBucket, -1, sizeof(pair<int,int>) * n_);
         sz = 0;
-    };
+    }
 
     ~_klv_bucket_queue_DK(){
         for(int i=0;i<lv;i++){
@@ -350,16 +316,6 @@ struct _klv_bucket_queue_DK{
     bool empty() {
         if (sz) return false;
         return true;
-    }
-
-    void clear(){
-        for(int i = 0; i < lv; i++) {
-            for(int j = 0; j < size[0]; j++)
-                while(bucket[i][j].sz) pool.pop(&bucket[i][j]);
-            actLv[i] = 0;
-            act[i]   = 0;
-        }
-        sz = 0;
     }
 
     void decrease_key(int u, keyType w, keyType old_du, keyType new_du){

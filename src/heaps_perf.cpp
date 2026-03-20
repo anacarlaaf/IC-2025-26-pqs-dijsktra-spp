@@ -19,7 +19,6 @@ struct heap_inter {
 struct binheapCPP : heap_inter{
     priority_queue<par, vector<par>, greater<par>> pq;
 
-    
     void insert(int u, keyType du, keyType w){
         pq.push({du, u});
     }
