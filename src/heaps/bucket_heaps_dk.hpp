@@ -72,6 +72,18 @@ struct _1lv_bucket_queue_DK{
         }
         insert(u, new_du, w);
     }
+
+    bool decrease_key_perf(int u, keyType w, keyType old_du, keyType new_du){
+        bool dk=false;
+        if(pool.idxs[u] != -1) {
+            int k = qBucket[u];
+            pool.remove(u, &bucket[k]);
+            sz--;
+            dk=true;
+        }
+        insert(u, new_du, w);
+        return dk;
+    }
 };
 
 struct _2lv_bucket_queue_DK{
@@ -176,6 +188,24 @@ struct _2lv_bucket_queue_DK{
             sz--;
         }
         insert(u, new_du, w);
+    }
+
+    bool decrease_key_perf(int u, keyType w, keyType old_du, keyType new_du){
+        bool dk = false;
+        if(pool.idxs[u] != -1) {
+            int k = qBucket[u];
+
+            if(k < b_size) {
+                pool.remove(u, &top_bucket[qBucket[u]]);
+            } else {
+                int kb = k & (b_size - 1);
+                pool.remove(u, &bottom_bucket[kb]);
+            }
+            sz--;
+            dk = true;
+        }
+        insert(u, new_du, w);
+        return dk;
     }
 };
 
@@ -326,5 +356,18 @@ struct _klv_bucket_queue_DK{
             sz--;
         }
         insert(u, new_du, w);
+    }
+
+    bool decrease_key_perf(int u, keyType w, keyType old_du, keyType new_du){
+        bool dk = false;
+        if(pool.idxs[u] != -1) {
+            pair<int, int> loc = qBucket[u];
+            pool.remove(u, &bucket[loc.first][loc.second]);
+            actLv[loc.first]--;
+            sz--;
+            dk = true;
+        }
+        insert(u, new_du, w);
+        return dk;
     }
 };

@@ -11,6 +11,7 @@ struct heap_inter {
     virtual par extract_min() = 0;
     virtual bool empty() = 0;
     virtual void decrease_key(int u, keyType w, keyType old_du, keyType new_du) = 0;
+    virtual bool decrease_key_perf(int u, keyType w, keyType old_du, keyType new_du) = 0;
     virtual ~heap_inter() = default;
 };
 
@@ -39,6 +40,11 @@ struct binheapCPP : heap_inter{
     }
 
     void decrease_key(int u, keyType w, keyType old_du, keyType new_du){
+        cerr << "Estrutura sem suporte a decrease_key";
+        exit(1);
+    }
+
+    bool decrease_key_perf(int u, keyType w, keyType old_du, keyType new_du){
         cerr << "Estrutura sem suporte a decrease_key";
         exit(1);
     }
@@ -71,13 +77,18 @@ struct binheap : heap_inter{
         exit(1);
     }
 
+    bool decrease_key_perf(int u, keyType w, keyType old_du, keyType new_du){
+        cerr << "Estrutura sem suporte a decrease_key";
+        exit(1);
+    }
+
 };
 
 struct _1lvbq : heap_inter{
     
     _1lv_bucket_queue bq;
 
-    _1lvbq(keyType _c, int n) : bq(_c, n) {}
+    _1lvbq(keyType _c) : bq(_c) {}
     
     void insert(int u, keyType du, keyType w) {
        bq.insert(u, du, w);
@@ -95,13 +106,18 @@ struct _1lvbq : heap_inter{
         cerr << "Estrutura sem suporte a decrease_key";
         exit(1);
     }
+
+    bool decrease_key_perf(int u, keyType w, keyType old_du, keyType new_du){
+        cerr << "Estrutura sem suporte a decrease_key";
+        exit(1);
+    }
 };
 
 struct _2lvbq : heap_inter{
     
     _2lv_bucket_queue bq;
 
-    _2lvbq(keyType _c, int n) : bq(_c, n) {}
+    _2lvbq(keyType _c) : bq(_c) {}
     
     void insert(int u, keyType du, keyType w) {
        bq.insert(u, du, w);
@@ -116,6 +132,11 @@ struct _2lvbq : heap_inter{
     }
 
     void decrease_key(int u, keyType w, keyType old_du, keyType new_du){
+        cerr << "Estrutura sem suporte a decrease_key";
+        exit(1);
+    }
+    
+    bool decrease_key_perf(int u, keyType w, keyType old_du, keyType new_du){
         cerr << "Estrutura sem suporte a decrease_key";
         exit(1);
     }
@@ -140,6 +161,11 @@ struct _klvbq : heap_inter{
     }
 
     void decrease_key(int u, keyType w, keyType old_du, keyType new_du){
+        cerr << "Estrutura sem suporte a decrease_key";
+        exit(1);
+    }
+
+    bool decrease_key_perf(int u, keyType w, keyType old_du, keyType new_du){
         cerr << "Estrutura sem suporte a decrease_key";
         exit(1);
     }
@@ -173,6 +199,17 @@ struct rb_tree : heap_inter{
         pq.erase({old_du, u});
         pq.insert({new_du, u});
     }
+
+    bool decrease_key_perf(int u, keyType w, keyType old_du, keyType new_du){
+        if(pq.erase({old_du, u})){
+            pq.insert({new_du, u});
+            return 1;
+        }
+        else{
+            pq.insert({new_du, u});
+            return 0;
+        }
+    }
 };
 
 struct fibonacci : heap_inter {
@@ -201,6 +238,19 @@ struct fibonacci : heap_inter {
         if (fh.get_key(u, current_key) == -1) fh.insert(new_du, u);
         else fh.decrease_key(u, new_du);
     }
+
+    bool decrease_key_perf(int u, keyType w, keyType old_du, keyType new_du){
+        keyType current_key;
+        if (fh.get_key(u, current_key) == -1) {
+            fh.insert(new_du, u);
+            return 0;
+        }
+        else {
+            fh.decrease_key(u, new_du);
+            return 1;
+        }
+    }
+    
 };
 
 //Bucket heaps com suporte a DK
@@ -226,6 +276,10 @@ struct _1lvbqDK : heap_inter{
     void decrease_key(int u, keyType w, keyType old_du, keyType new_du){
         bq.decrease_key(u, w, old_du, new_du);
     }
+
+    bool decrease_key_perf(int u, keyType w, keyType old_du, keyType new_du){
+        return bq.decrease_key_perf(u, w, old_du, new_du);
+    }
 };
 
 struct _2lvbqDK : heap_inter{
@@ -250,6 +304,10 @@ struct _2lvbqDK : heap_inter{
     void decrease_key(int u, keyType w, keyType old_du, keyType new_du){
         bq.decrease_key(u, w, old_du, new_du);
     }
+
+    bool decrease_key_perf(int u, keyType w, keyType old_du, keyType new_du){
+        return bq.decrease_key_perf(u, w, old_du, new_du);
+    }
 };
 
 
@@ -273,5 +331,9 @@ struct _klvbqDK : heap_inter{
 
     void decrease_key(int u, keyType w, keyType old_du, keyType new_du){
         bq.decrease_key(u, w, old_du, new_du);
+    }
+
+    bool decrease_key_perf(int u, keyType w, keyType old_du, keyType new_du){
+        return bq.decrease_key_perf(u, w, old_du, new_du);
     }
 };

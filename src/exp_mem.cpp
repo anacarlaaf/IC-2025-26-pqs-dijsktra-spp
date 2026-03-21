@@ -13,8 +13,8 @@ pq create_pq(PQS q, int n, keyType c, int k=0) {
         case BINHCPP : return new binheapCPP();
         case BINH: return new binheap(n);
         case FIBH: return new fibonacci(n);
-        case _1LVBQ : return new _1lvbq(c, n);
-        case _2LVBQ : return new _2lvbq(c, n);
+        case _1LVBQ : return new _1lvbq(c);
+        case _2LVBQ : return new _2lvbq(c);
         case _KLVBQ : return new _klvbq(c, k);
         case _1LVBQDK : return new _1lvbqDK(c, n);
         case _2LVBQDK : return new _2lvbqDK(c, n);
@@ -87,8 +87,8 @@ void exp(string input, string fila, char restart){
     // Gabarito (usa fila de prioridade do C++ para comparar resultados) ----------
 
     int st = 10;
-
     shortest_path gabarito;
+
     pq pq_cpp = create_pq(BINHCPP, qtd_ver, max_weight, 6);
     gabarito.init_dijkstra(pq_cpp, qtd_ver, st, false);
     gabarito.dijkstra_ndk(g, pq_cpp);
@@ -98,16 +98,27 @@ void exp(string input, string fila, char restart){
 
     int tam = fila.size();
     PQS p;
-    if(fila[0]-'0'>2){
+    int lv_int = 1;
+    char lv = '1';
+    if(fila.compare(1,4, "LVBQ")==0 && fila[0]-'0'>2){
         if(fila[tam-1]=='K') p = _KLVBQDK;
         else p = _KLVBQ;
+        lv = fila[0];
+        lv_int = lv-'0';
     }
-    else p = toPq[fila];
+    else {
+        auto it = toPq.find(fila);
+        if (it == toPq.end()) {
+            cerr << "Fila inválida: " << fila << "\n";
+            exit(1);
+        }
+        p = toPq[fila];
+    }
     bool dk=false;
     if (p==FIBH || p==RBT || p==_KLVBQDK || p==_2LVBQDK || p==_1LVBQDK) dk=true;
-    char lv = fila[0];
-    int lv_int = lv-'0';
     pq q;
+
+    long long mem_st = getPeakMemory(); // mede mem do gabarito e grafo para isolar o uso de mem de dijkstra+fila
 
     shortest_path sp;
     for(int i = 0; i < 10; i++) {
@@ -136,11 +147,13 @@ void exp(string input, string fila, char restart){
         delete q;
     }
 
+    long long mem_fim = getPeakMemory();
+
     cout << "\n------------------------------\n";
 
     gabarito.clear();
 
-    string output = "../data/outs/mem.csv";
+    string output = "../data/outs/all_mem.csv";
 
     if (restart == '1') {
         // Primeira execução: trunca e escreve header
@@ -155,10 +168,10 @@ void exp(string input, string fila, char restart){
     // Sempre abre em modo append para escrever o resultado
     ofstream fileO(output, ios::app);
     fileO << fixed << setprecision(6);
-    long long mem = getPeakMemory();
-    cout << "Uso de memória: " << mem << " bytes\n";
+    long long delta = mem_fim - mem_st;
+    cout << "Uso de memória: " << delta << " bytes\n";
     fileO << input << " " << qtd_ver << " " << qtd_edges << " "
-        << max_weight << " " << fila << " " << mem << "\n";
+        << max_weight << " " << fila << " " << delta << "\n";
     fileO.close();
     }
 

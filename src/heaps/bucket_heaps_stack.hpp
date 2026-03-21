@@ -3,14 +3,14 @@ using namespace std;
 #include "../../utils/define.hpp"
 
 struct _1lv_bucket_queue{
-    vector<par> *b;
+    stack<par> *b;
  
     int b_size = 0;
     int a = 0, sz=0;
 
-    _1lv_bucket_queue(keyType c) {
-        b_size = 1 << (32 - __builtin_clz((int)c));
-        b = new vector<par>[b_size];
+    _1lv_bucket_queue(keyType c_, int n) {
+        b_size = 1 << (32 - __builtin_clz((int)c_));
+        b = new stack<par>[b_size];
     }
 
     ~_1lv_bucket_queue() {
@@ -19,7 +19,7 @@ struct _1lv_bucket_queue{
     
     void insert(int u, keyType du, keyType w) {
         int id = (a+w) & (b_size-1);
-        b[id].push_back({du,u});
+        b[id].push({du,u});
         sz++;
     }
 
@@ -38,8 +38,8 @@ struct _1lv_bucket_queue{
  
     par extract_min() {
         update();
-        par u = b[a].back();
-        b[a].pop_back();
+        par u = b[a].top();
+        b[a].pop();
         sz--;
         return u;
     }
@@ -50,7 +50,7 @@ struct _1lv_bucket_queue{
 };
 
 struct _2lv_bucket_queue{
-    vector<par> *bucket[2]; // 2 arrays de buckets alocados em um mesmo array
+    stack<par> *bucket[2]; // 2 arrays de buckets alocados em um mesmo array
     //queue<par> *top_bucket, *bottom_bucket;
 
     int sz=0;
@@ -58,10 +58,10 @@ struct _2lv_bucket_queue{
     ll b_size = 0;     // tamanho dos buckets
 
     // inicia os buckets
-    _2lv_bucket_queue(keyType c) {
+    _2lv_bucket_queue(keyType c, int n) {
         b_size = 1 << ((32 - __builtin_clz((int)c)) / 2 + 1);
-        bucket[0] = new vector<par>[b_size];
-        bucket[1] = new vector<par>[b_size];
+        bucket[0] = new stack<par>[b_size];
+        bucket[1] = new stack<par>[b_size];
     }
 
     ~_2lv_bucket_queue(){
@@ -74,10 +74,10 @@ struct _2lv_bucket_queue{
         ll j = dist & (b_size-1);            // se não, insere no top
     
         if (i == at && j >= ab) {
-            bucket[1][j].push_back({dist,v});
+            bucket[1][j].push({dist,v});
         }
         else{
-            bucket[0][i].push_back({dist,v});
+            bucket[0][i].push({dist,v});
         }
         sz++;
     }
@@ -101,17 +101,17 @@ struct _2lv_bucket_queue{
         int aux = bucket[0][at].size();
         ab = b_size;
         for(int i=0;i<aux;i++){
-            auto a = bucket[0][at].back(); bucket[0][at].pop_back();
+            auto a = bucket[0][at].top(); bucket[0][at].pop();
             ll nova_ab = a.first & (b_size-1); // a.first % b_size;
             ab = min(ab, nova_ab);
-            bucket[1][nova_ab].push_back(a);  // insere no bottom bucket
+            bucket[1][nova_ab].push(a);  // insere no bottom bucket
         }
     }
  
     par extract_min(){
         update();
-        par min_elem = bucket[1][ab].back();
-        bucket[1][ab].pop_back();
+        par min_elem = bucket[1][ab].top();
+        bucket[1][ab].pop();
         sz--;
         return min_elem;
     }
@@ -123,7 +123,7 @@ struct _2lv_bucket_queue{
 
 
 struct _klv_bucket_queue{
-    vector<par> **bucket; //
+    stack<par> **bucket; //
     int *actLv; //
     ll *size;   //
     ll *act;    //     // bucket ativos
@@ -142,12 +142,12 @@ struct _klv_bucket_queue{
         size   = new ll[k]();
         act    = new ll[k]();
         actLv  = new int[k]();
-        bucket = new vector<par>*[k];
+        bucket = new stack<par>*[k];
 
         ll acc = aux;
         for (int i = 0; i < k; i++) {
             size[i]   = acc;
-            bucket[i] = new vector<par>[aux];
+            bucket[i] = new stack<par>[aux];
             acc      *= aux;
         }
         
@@ -173,7 +173,7 @@ struct _klv_bucket_queue{
         for(int i=0;i<lv-2;i++){
             lvs = (dist/size[lv-i-1]) & aux;
             if(lvs != act[i]){
-                bucket[i][lvs].push_back({dist, v});
+                bucket[i][lvs].push({dist, v});
                 actLv[i]++;
                 return;
             }
@@ -182,11 +182,11 @@ struct _klv_bucket_queue{
         lvs = (dist/size[lv-2]) & aux;
         ll last_lvs = dist & aux;
         if (lvs != act[lv-2] || last_lvs < act[lv-1]){
-            bucket[lv-2][lvs].push_back({dist, v});
+            bucket[lv-2][lvs].push({dist, v});
             actLv[lv-2]++;
         }
         else{
-            bucket[lv-1][last_lvs].push_back({dist, v});
+            bucket[lv-1][last_lvs].push({dist, v});
             actLv[lv-1]++;
         }
     }
@@ -218,15 +218,15 @@ struct _klv_bucket_queue{
         for(int i=aux; i<lv-1; i++){
             act[i+1] = size[0];
             while(!bucket[i][act[i]].empty()){
-                par v = bucket[i][act[i]].back();
-                bucket[i][act[i]].pop_back();
+                par v = bucket[i][act[i]].top();
+                bucket[i][act[i]].pop();
                 actLv[i]--;
 
                 ll novo;
                 if(i+1 == lv-1) novo = v.first & mod;
                 else novo = (v.first / size[lv-i-2]) & mod;
                 
-                bucket[i+1][novo].push_back(v);
+                bucket[i+1][novo].push(v);
                 actLv[i+1]++;
                 act[i+1] = min(act[i+1], novo);
             }
@@ -238,8 +238,8 @@ struct _klv_bucket_queue{
 
         assert(!bucket[lv-1][act[lv-1]].empty());
         assert(act[lv-1]>=0 && act[lv-1]<size[0]);
-        par min_elem = bucket[lv-1][act[lv-1]].back();
-        bucket[lv-1][act[lv-1]].pop_back();
+        par min_elem = bucket[lv-1][act[lv-1]].top();
+        bucket[lv-1][act[lv-1]].pop();
         actLv[lv-1]--;
         sz--;
         return min_elem;
