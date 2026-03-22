@@ -106,15 +106,6 @@ constexpr uint64_t cache_config(uint32_t cache,
 }
 
 // ─────────────────────────────────────────────────────────────
-// RSS (memória residente)
-// ─────────────────────────────────────────────────────────────
-long get_rss_kb() {
-    rusage ru{};
-    getrusage(RUSAGE_SELF, &ru);
-    return ru.ru_maxrss;  // KB no Linux
-}
-
-// ─────────────────────────────────────────────────────────────
 // Conjunto de métricas
 // ─────────────────────────────────────────────────────────────
 struct CacheStats {
@@ -199,7 +190,6 @@ struct CacheStats {
         r_l2           = l2_refs.stop();
         r_l1           = l1_load_miss.stop();
 
-        r_rss_kb = get_rss_kb();
     }
 
     // ───────────────────────────────────
@@ -233,7 +223,6 @@ struct CacheStats {
 
         printf("\nMemory:\n");
         printf("  Page faults  : %10lu\n", r_page_faults);
-        printf("  RSS (KB)     : %10ld\n", r_rss_kb);
 
         printf("\n");
     }

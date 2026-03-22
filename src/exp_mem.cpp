@@ -32,6 +32,7 @@ long long getPeakMemory() {
     return 0;
 }
 
+
 void exp(string input, string fila, char restart){
 
 
@@ -118,7 +119,7 @@ void exp(string input, string fila, char restart){
     if (p==FIBH || p==RBT || p==_KLVBQDK || p==_2LVBQDK || p==_1LVBQDK) dk=true;
     pq q;
 
-    long long mem_st = getPeakMemory(); // mede mem do gabarito e grafo para isolar o uso de mem de dijkstra+fila
+    if((p==_1LVBQDK || p==_1LVBQ) && input=="GEN9") exit(0);
 
     shortest_path sp;
     for(int i = 0; i < 10; i++) {
@@ -147,7 +148,7 @@ void exp(string input, string fila, char restart){
         delete q;
     }
 
-    long long mem_fim = getPeakMemory();
+    long long mem = getPeakMemory();
 
     cout << "\n------------------------------\n";
 
@@ -165,13 +166,14 @@ void exp(string input, string fila, char restart){
         exit(1);
     }
 
+
     // Sempre abre em modo append para escrever o resultado
     ofstream fileO(output, ios::app);
     fileO << fixed << setprecision(6);
-    long long delta = mem_fim - mem_st;
-    cout << "Uso de memória: " << delta << " bytes\n";
+    //long long delta = mem_fim - mem_st;
+    cout << "Uso de memória: " << mem << " bytes\n";
     fileO << input << " " << qtd_ver << " " << qtd_edges << " "
-        << max_weight << " " << fila << " " << delta << "\n";
+        << max_weight << " " << fila << " " << mem << "\n";
     fileO.close();
     }
 

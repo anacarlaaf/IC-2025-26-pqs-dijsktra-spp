@@ -59,7 +59,7 @@ void exp(){
     ofstream fileO(output);
 
     fileO << fixed << setprecision(6);
-    fileO <<"nome n m c fila cpu_time wall_time l1 l2 llc cycles inst dtlb page_faults rss branch_inst branch_miss\n";
+    fileO <<"nome n m c fila cpu_time wall_time l1_miss l2_ref llc_miss cycles inst dtlb page_faults branch_inst branch_miss\n";
     fileO.flush();
 
     // ------------------------------------------------
@@ -182,7 +182,7 @@ void exp(){
 
                 fileO << f << " " << qtd_ver << " " << qtd_edges << " " << max_weight << " " << s << " " << elap_cpu << " " << elap_wall << 
                 " " << cache.r_l1 << " " << cache.r_l2 << " " << cache.r_llc << " " << cache.r_cycles << " " << cache.r_instructions << " " << 
-                cache.r_dtlb << " " << cache.r_page_faults << " " << cache.r_rss_kb << " " << cache.r_branch_instr << " " << cache.r_branch_miss << "\n";
+                cache.r_dtlb << " " << cache.r_page_faults << " " << cache.r_branch_instr << " " << cache.r_branch_miss << "\n";
 
                 if (i == 0) {
                     for(int j = 0; j < qtd_ver; j++){
