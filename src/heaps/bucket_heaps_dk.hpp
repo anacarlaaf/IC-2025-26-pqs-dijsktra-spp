@@ -3,6 +3,7 @@ using namespace std;
 #include "../../utils/define.hpp"
 
 struct _1lv_bucket_queue_DK{
+    ops op;
     bkt *bucket;
     pool_list pool;
     int *qBucket;
@@ -15,7 +16,7 @@ struct _1lv_bucket_queue_DK{
     
     _1lv_bucket_queue_DK(keyType c, int n_) {
         n     = n_;
-        b_size = 1 << (32 - __builtin_clz((int)c));
+        b_size = 1 << (32 - __builtin_clz((int)c-1));
         
         bucket  = new bkt[b_size]();   // zero-init: sz=0, tail=0
         qBucket = new int[n]();
@@ -33,20 +34,24 @@ struct _1lv_bucket_queue_DK{
     }
 
     void insert(int v, keyType dist, keyType w){
-        ll id = (a + w) & (b_size - 1);  // usa dist, não a+w
+        ll id = (a + w) & (b_size - 1); 
         pool.insert({dist, v}, &bucket[id]);
         qBucket[v] = id;
         sz++;
+        op.ins++;
     }
 
     void update(){
         if (bucket[a].sz) return;
+
+        op.upd++;
 
         int bg = a;
         int aux = b_size-1;
         do {
             a = (a + 1) & (aux);
             if (bucket[a].sz) return;
+            op.bkemp++;
         } while (a != bg);
 
         assert(false);
@@ -57,6 +62,7 @@ struct _1lv_bucket_queue_DK{
         par min_elem = pool.pool[bucket[a].tail].data;
         pool.pop(&bucket[a]);
         sz--;
+        op.exmin++;
         return min_elem;
     }
  
@@ -69,24 +75,14 @@ struct _1lv_bucket_queue_DK{
             int k = qBucket[u];
             pool.remove(u, &bucket[k]);
             sz--;
+            op.dk++;
         }
         insert(u, new_du, w);
-    }
-
-    bool decrease_key_perf(int u, keyType w, keyType old_du, keyType new_du){
-        bool dk=false;
-        if(pool.idxs[u] != -1) {
-            int k = qBucket[u];
-            pool.remove(u, &bucket[k]);
-            sz--;
-            dk=true;
-        }
-        insert(u, new_du, w);
-        return dk;
     }
 };
 
 struct _2lv_bucket_queue_DK{
+    ops op;
     bkt *top_bucket, *bottom_bucket;
     pool_list pool;
     int *qBucket;
@@ -99,8 +95,8 @@ struct _2lv_bucket_queue_DK{
     
     _2lv_bucket_queue_DK(keyType c, int n_) {
         n      = n_;
-        b_size = 1 << ((32 - __builtin_clz((int)c)) / 2 + 1);
-
+        int aux = sqrt((int)c);
+        b_size = 1 << (32 - __builtin_clz(aux-1));
         top_bucket    = new bkt[b_size]();
         bottom_bucket = new bkt[b_size]();
         qBucket       = new int[n]();
@@ -119,6 +115,7 @@ struct _2lv_bucket_queue_DK{
     }
  
     void insert(int v, keyType dist, keyType w){
+        op.ins++;
         ll i =  (dist / b_size) & (b_size-1);  // se i = top bucket ativo, insere no bottom
         ll j = dist & (b_size-1);            // se não, insere no top
     
@@ -135,15 +132,20 @@ struct _2lv_bucket_queue_DK{
  
     void update(){
         // procura um bottom bucket não vazio
-        while(ab < b_size && bottom_bucket[ab].sz==0) ab++;
+        while(ab < b_size && bottom_bucket[ab].sz==0) {
+            ab++;
+            op.bkemp++;
+        }
         if(ab < b_size) return;
 
+        op.upd++;
          
         // expand: se nao encontrar, distribui elementos de outro top bucket
         ll start = at;
         do {
             if(top_bucket[at].sz != 0) break;
             at++;
+            op.bkemp++;
             if(at == b_size) at = 0;
         }  while(at != start);
         if(!top_bucket[at].sz) return;
@@ -165,6 +167,7 @@ struct _2lv_bucket_queue_DK{
  
     par extract_min(){
         update();
+        op.exmin++;
         par min_elem = pool.pool[bottom_bucket[ab].tail].data;
         pool.pop(&bottom_bucket[ab]);
         sz--;
@@ -186,37 +189,21 @@ struct _2lv_bucket_queue_DK{
                 pool.remove(u, &bottom_bucket[kb]);
             }
             sz--;
+            op.dk++;
         }
         insert(u, new_du, w);
-    }
-
-    bool decrease_key_perf(int u, keyType w, keyType old_du, keyType new_du){
-        bool dk = false;
-        if(pool.idxs[u] != -1) {
-            int k = qBucket[u];
-
-            if(k < b_size) {
-                pool.remove(u, &top_bucket[qBucket[u]]);
-            } else {
-                int kb = k & (b_size - 1);
-                pool.remove(u, &bottom_bucket[kb]);
-            }
-            sz--;
-            dk = true;
-        }
-        insert(u, new_du, w);
-        return dk;
     }
 };
 
 struct _klv_bucket_queue_DK{
-
+    
+    ops op;
     pool_list pool;
     pair<int,int> *qBucket;
     bkt **bucket; //
     int *actLv; //
     ll *size;   //
-    ll *act;    //     // bucket ativos
+    int *act;    //     // bucket ativos
     int sz;
     int lv;
  
@@ -224,11 +211,12 @@ struct _klv_bucket_queue_DK{
     _klv_bucket_queue_DK(keyType c, int n_, int k) {
         lv = k;
 
-        ll aux = 1;
-        while (aux < (ll)(pow((double)c + 1.0, 1.0/k) + 2)) aux <<= 1;
+        c++;
+        int targ= ceil(pow((int)c, 1.0 / k));
+        int aux = 1 << (32 - __builtin_clz(targ - 1));
 
         size    = new ll[k]();
-        act     = new ll[k]();
+        act     = new int[k]();
         actLv   = new int[k]();
         bucket  = new bkt*[k];
         qBucket = new pair<int,int>[n_];
@@ -260,6 +248,7 @@ struct _klv_bucket_queue_DK{
  
     void insert(int v, keyType dist, keyType w){
         sz++;
+        op.ins++;
         
         ll lvs;
         ll mod = size[0]-1;
@@ -289,10 +278,13 @@ struct _klv_bucket_queue_DK{
  
     void update(){
         // procura bucket não vazio no nível mais baixo
-        while(act[lv-1] < size[0] && bucket[lv-1][act[lv-1]].sz==0) act[lv-1]++;
+        while(act[lv-1] < size[0] && bucket[lv-1][act[lv-1]].sz==0) {
+            act[lv-1]++;
+            op.bkemp++;
+        }
         if(act[lv-1] < size[0]) return;
 
-
+        op.upd++;
         // se não encontrar, expandir
         // procurar nível não vazio
         int aux = lv-2;
@@ -303,6 +295,7 @@ struct _klv_bucket_queue_DK{
         int b = act[aux];
          do{
             if(bucket[aux][b].sz) break;
+            op.bkemp++;
             b = (b + 1) & mod;
         } while(b!=act[aux]);
         act[aux] = b;
@@ -318,7 +311,7 @@ struct _klv_bucket_queue_DK{
                 pool.pop(&bucket[i][act[i]]);
                 actLv[i]--;
 
-                ll novo;
+                int novo;
                 if (i+1==lv-1) novo = v.first & mod;
                 else novo = (v.first/size[lv-i-2]) & mod;
 
@@ -340,6 +333,7 @@ struct _klv_bucket_queue_DK{
         pool.pop(&bucket[lv-1][act[lv-1]]);
         actLv[lv-1]--;
         sz--;
+        op.exmin++;
         return min_elem;
     }
  
@@ -354,20 +348,8 @@ struct _klv_bucket_queue_DK{
             pool.remove(u, &bucket[loc.first][loc.second]);
             actLv[loc.first]--;
             sz--;
+            op.dk++;
         }
         insert(u, new_du, w);
-    }
-
-    bool decrease_key_perf(int u, keyType w, keyType old_du, keyType new_du){
-        bool dk = false;
-        if(pool.idxs[u] != -1) {
-            pair<int, int> loc = qBucket[u];
-            pool.remove(u, &bucket[loc.first][loc.second]);
-            actLv[loc.first]--;
-            sz--;
-            dk = true;
-        }
-        insert(u, new_du, w);
-        return dk;
     }
 };

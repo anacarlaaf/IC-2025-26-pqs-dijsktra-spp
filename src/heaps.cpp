@@ -3,6 +3,8 @@
 #include "heaps/bucket_heaps_dk.hpp"
 #include "heaps/bucket_heaps_vector.hpp"
 #include "heaps/bin_heap.hpp"
+#include "heaps/pairing_heap.hpp"
+#include "heaps/radix_heap.hpp"
 
 using namespace std;
 
@@ -11,7 +13,7 @@ struct heap_inter {
     virtual par extract_min() = 0;
     virtual bool empty() = 0;
     virtual void decrease_key(int u, keyType w, keyType old_du, keyType new_du) = 0;
-    virtual bool decrease_key_perf(int u, keyType w, keyType old_du, keyType new_du) = 0;
+    virtual ops get_op() const {return {};}
     virtual ~heap_inter() = default;
 };
 
@@ -44,10 +46,6 @@ struct binheapCPP : heap_inter{
         exit(1);
     }
 
-    bool decrease_key_perf(int u, keyType w, keyType old_du, keyType new_du){
-        cerr << "Estrutura sem suporte a decrease_key";
-        exit(1);
-    }
 };
 
 struct binheap : heap_inter{
@@ -77,9 +75,8 @@ struct binheap : heap_inter{
         exit(1);
     }
 
-    bool decrease_key_perf(int u, keyType w, keyType old_du, keyType new_du){
-        cerr << "Estrutura sem suporte a decrease_key";
-        exit(1);
+    ops get_op() const override{
+        return pq.op;
     }
 
 };
@@ -106,10 +103,8 @@ struct _1lvbq : heap_inter{
         cerr << "Estrutura sem suporte a decrease_key";
         exit(1);
     }
-
-    bool decrease_key_perf(int u, keyType w, keyType old_du, keyType new_du){
-        cerr << "Estrutura sem suporte a decrease_key";
-        exit(1);
+    ops get_op() const override{
+        return bq.op;
     }
 };
 
@@ -135,10 +130,9 @@ struct _2lvbq : heap_inter{
         cerr << "Estrutura sem suporte a decrease_key";
         exit(1);
     }
-    
-    bool decrease_key_perf(int u, keyType w, keyType old_du, keyType new_du){
-        cerr << "Estrutura sem suporte a decrease_key";
-        exit(1);
+
+    ops get_op() const override{
+        return bq.op;
     }
 };
 
@@ -165,11 +159,11 @@ struct _klvbq : heap_inter{
         exit(1);
     }
 
-    bool decrease_key_perf(int u, keyType w, keyType old_du, keyType new_du){
-        cerr << "Estrutura sem suporte a decrease_key";
-        exit(1);
+    ops get_op() const override{
+        return bq.op;
     }
 };
+
 
 
 // Cem suporte a decrease_key
@@ -198,17 +192,6 @@ struct rb_tree : heap_inter{
     void decrease_key(int u, keyType w, keyType old_du, keyType new_du) {
         pq.erase({old_du, u});
         pq.insert({new_du, u});
-    }
-
-    bool decrease_key_perf(int u, keyType w, keyType old_du, keyType new_du){
-        if(pq.erase({old_du, u})){
-            pq.insert({new_du, u});
-            return 1;
-        }
-        else{
-            pq.insert({new_du, u});
-            return 0;
-        }
     }
 };
 
@@ -250,8 +233,13 @@ struct fibonacci : heap_inter {
             return 1;
         }
     }
+
+    ops get_op() const override{
+        return fh.op;
+    }
     
 };
+
 
 //Bucket heaps com suporte a DK
 
@@ -277,8 +265,8 @@ struct _1lvbqDK : heap_inter{
         bq.decrease_key(u, w, old_du, new_du);
     }
 
-    bool decrease_key_perf(int u, keyType w, keyType old_du, keyType new_du){
-        return bq.decrease_key_perf(u, w, old_du, new_du);
+    ops get_op() const override{
+        return bq.op;
     }
 };
 
@@ -305,9 +293,10 @@ struct _2lvbqDK : heap_inter{
         bq.decrease_key(u, w, old_du, new_du);
     }
 
-    bool decrease_key_perf(int u, keyType w, keyType old_du, keyType new_du){
-        return bq.decrease_key_perf(u, w, old_du, new_du);
+    ops get_op() const override{
+        return bq.op;
     }
+
 };
 
 
@@ -333,7 +322,69 @@ struct _klvbqDK : heap_inter{
         bq.decrease_key(u, w, old_du, new_du);
     }
 
-    bool decrease_key_perf(int u, keyType w, keyType old_du, keyType new_du){
-        return bq.decrease_key_perf(u, w, old_du, new_du);
+    ops get_op() const override{
+        return bq.op;
     }
+
 };
+
+// struct pheap : heap_inter {
+ 
+//     pairing_heap ph;
+ 
+//     pheap() {}
+ 
+//     void insert(int u, keyType du, keyType /*w*/) {
+//         ph.insert(u, du);
+//     }
+ 
+//     par extract_min() {
+//         return ph.extract_min();
+//     }
+ 
+//     bool empty() {
+//         return ph.empty();
+//     }
+ 
+//     void decrease_key(int u, keyType /*w*/, keyType /*old_du*/, keyType new_du) {
+//         ph.decrease_key()
+//     }
+ 
+//     bool decrease_key_perf(int /*u*/, keyType /*w*/,
+//                            keyType /*old_du*/, keyType /*new_du*/) {
+//         // Pairing heap não oferece decrease_key por vértice sem mapa externo;
+//         // retorna false para sinalizar que a operação não foi executada.
+//         return false;
+//     }
+// };
+ 
+
+// struct rheap : heap_inter {
+ 
+//     radix_heap rh;
+ 
+//     rheap() {}
+ 
+//     void insert(int u, keyType du, keyType /*w*/) {
+//         rh.insert(u, du);
+//     }
+ 
+//     par extract_min() {
+//         return rh.extract_min();
+//     }
+ 
+//     bool empty() {
+//         return rh.empty();
+//     }
+
+//     void decrease_key(int u, keyType w, keyType old_du, keyType new_du){
+//         cerr << "Estrutura sem suporte a decrease_key";
+//         exit(1);
+//     }
+
+//     bool decrease_key_perf(int u, keyType w, keyType old_du, keyType new_du){
+//         cerr << "Estrutura sem suporte a decrease_key";
+//         exit(1);
+//     }
+// };
+ 

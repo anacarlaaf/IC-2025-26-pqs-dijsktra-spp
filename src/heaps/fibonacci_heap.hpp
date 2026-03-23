@@ -60,6 +60,7 @@ class fibonacci_heap
 {
   public:
     /** Constructor for heap with specified capacity */
+    ops op;
     fibonacci_heap(int capacity)
         : min_root(NULL), nodes(NULL), num_nodes(0), num_trees(0), max_num_nodes(capacity), A(NULL), Dn(0)
     {
@@ -91,6 +92,7 @@ class fibonacci_heap
      */
     void insert(keyType key, int index)
     {
+        op.ins++;
         if (index >= static_cast<int>(max_num_nodes) || index < 0)
             return;
 
@@ -136,6 +138,7 @@ class fibonacci_heap
      */
     par extract_min()//ll& ret_key)
     {
+        op.exmin++;
         fibonacci_heap_node* min_node;
         fibonacci_heap_node *child, *next_child;
 
@@ -224,6 +227,7 @@ class fibonacci_heap
      */
     void decrease_key(int index, keyType& key)
     {
+        op.dk++;
         fibonacci_heap_node* parent;
 
         if (index >= max_num_nodes || index < 0)

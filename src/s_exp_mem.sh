@@ -2,8 +2,8 @@
 
 # ./exp_mem.sh
 programa="./exp_mem"   # nome do executável
-arquivo_inputs="in_graphs.txt"
-arquivo_filas="in_filas.txt"
+arquivo_inputs="in_mem_graphs.txt"
+arquivo_filas="in_mem_filas.txt"
 
 primeira_exec=1
 

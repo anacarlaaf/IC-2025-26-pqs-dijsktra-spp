@@ -1,0 +1,11 @@
+/home/anacarla/Documents/pin-external-4.2-99776-g21d818fa2-gcc-linux/pin
+
+cp dijkstra_opcodes.cpp /home/anacarla/Documents/pin-external-4.2-99776-g21d818fa2-gcc-linux/source/tools/ManualExamples/
+cd /home/anacarla/Documents/pin-external-4.2-99776-g21d818fa2-gcc-linux/source/tools/ManualExamples
+make obj-intel64/dijkstra_opcodes.so TARGET=intel64
+
+
+/home/anacarla/Documents/Repos/IC-2025-26-pqs-dijsktra-spp/src/exp_pin
+
+$PIN_ROOT/pin   -t $PIN_ROOT/source/tools/ManualExamples/obj-intel64/dijkstra_opcodes.so   -o resultados.csv   -input NY   -fila BINH   -- /home/anacarla/Do
+cuments/Repos/IC-2025-26-pqs-dijsktra-spp/src/exp_pin PIN3 BINH

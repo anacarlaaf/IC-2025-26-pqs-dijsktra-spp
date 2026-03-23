@@ -5,6 +5,7 @@ using namespace std;
 struct bin_heap{
     int tam=0;
     vector<par> pq;
+    ops op;
 
     bin_heap() {}          
     bin_heap(int n) {      
@@ -44,6 +45,7 @@ struct bin_heap{
         pq.push_back({du,u});
         tam++;
         corrigeSubindo();
+        op.ins++;
     }
 
     par extract_min(){
@@ -52,6 +54,7 @@ struct bin_heap{
         tam--;
         corrigeDescendo();
         pq.pop_back();
+        op.exmin++;
         return menor;
     }
 

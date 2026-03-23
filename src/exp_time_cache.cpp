@@ -12,6 +12,9 @@ pq create_pq(PQS q, int n, keyType c, int k=0) {
         case BINHCPP : return new binheapCPP();
         case BINH: return new binheap(n);
         case FIBH: return new fibonacci(n);
+        // case SEQUENCE: return new seq_heap();
+        // case PAIRING: return new pairing_dk();
+        // case HOT: return new hot_queue_dk(c, k);
         case _1LVBQ : return new _1lvbq(c);
         case _2LVBQ : return new _2lvbq(c);
         case _KLVBQ : return new _klvbq(c, k);
@@ -59,7 +62,7 @@ void exp(){
     ofstream fileO(output);
 
     fileO << fixed << setprecision(6);
-    fileO <<"nome n m c fila cpu_time wall_time l1_miss l2_ref llc_miss cycles inst dtlb page_faults branch_inst branch_miss\n";
+    fileO <<"nome n m c insert extractMin dk bkmp fila cpu_time wall_time l1_miss l2_ref llc_miss cycles inst dtlb page_faults branch_inst branch_miss\n";
     fileO.flush();
 
     // ------------------------------------------------
@@ -179,8 +182,8 @@ void exp(){
                 if(s[0]=='K') s = '_'+lv+"BQTH";
                 elap_cpu = otimer.elapsed_cpu_ms();
                 elap_wall = otimer.elapsed_wall_ms();
-
-                fileO << f << " " << qtd_ver << " " << qtd_edges << " " << max_weight << " " << s << " " << elap_cpu << " " << elap_wall << 
+                ops op = q->get_op();
+                fileO << f << " " << qtd_ver << " " << qtd_edges << " " << max_weight << " " << op.ins <<" " << op.exmin <<" " << op.dk <<" " << op.bkemp <<" "<< s << " " << elap_cpu << " " << elap_wall << 
                 " " << cache.r_l1 << " " << cache.r_l2 << " " << cache.r_llc << " " << cache.r_cycles << " " << cache.r_instructions << " " << 
                 cache.r_dtlb << " " << cache.r_page_faults << " " << cache.r_branch_instr << " " << cache.r_branch_miss << "\n";
 

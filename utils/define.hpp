@@ -28,6 +28,9 @@ enum PQS {
     FIBH,
     BINH,
     RH,
+    PAIRING,
+    HOT,
+    SEQUENCE,
     _1LVBQ,
     _2LVBQ,
     _KLVBQ,
@@ -41,6 +44,9 @@ map<string, PQS> toPq = {
     {"FIBH", FIBH},
     {"BINH", BINH},
     {"RH", RH},
+    {"PAIRING", PAIRING},
+    {"SEQUENCE", SEQUENCE},
+    {"HOT", HOT},
     {"1LVBQ", _1LVBQ},
     {"2LVBQ", _2LVBQ},
     {"KLVBQ", _KLVBQ},
@@ -56,6 +62,17 @@ struct bkt{
 struct element{
     par data;
     int prev, prox;
+};
+
+struct ops{
+    // ops de pq
+    int ins=0;
+    int exmin=0;
+    int dk=0;
+    int bkemp=0;
+
+    // ops aux
+    int upd=0;
 };
 
 struct pool_list{
