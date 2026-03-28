@@ -1,6 +1,7 @@
 #include "dijkstra.cpp"
 #include "../utils/perf.hpp"
-#include "bits/stdc++.h"
+#include <bits/stdc++.h>
+#include <random>
 using namespace std;
 
 // sudo sysctl -w kernel/perf_event_paranoid=1 (pra permitir ler cache miss)
@@ -28,6 +29,9 @@ pq create_pq(PQS q, int n, keyType c, int k=0) {
 void exp(){
 
     // 1. Ler e definir filas e grafos ----------------
+
+    random_device rd;
+    mt19937 gen(rd());
 
     vector<string> pqs;
     vector<string> inputs;
@@ -64,6 +68,8 @@ void exp(){
     fileO << fixed << setprecision(6);
     fileO <<"nome n m c insert extractMin dk bkmp fila cpu_time wall_time l1_miss l2_ref llc_miss cycles inst dtlb page_faults branch_inst branch_miss\n";
     fileO.flush();
+
+    shortest_path gabarito;
 
     // ------------------------------------------------
 
@@ -120,18 +126,6 @@ void exp(){
 
         // Experimentos
 
-        // Gabarito (usa fila de prioridade do C++ para comparar resultados) ----------
-
-        int st = 10;
-
-        shortest_path gabarito;
-        pq pq_cpp = create_pq(BINHCPP, qtd_ver, max_weight, 1);
-        gabarito.init_dijkstra(pq_cpp, qtd_ver, st, false);
-        gabarito.dijkstra_ndk(g, pq_cpp);
-        delete pq_cpp;
-
-        // ----------------------------------------------------------------------------
-
         for(string s : pqs) {
             int tam = s.size();
             PQS p;
@@ -160,6 +154,18 @@ void exp(){
 
             shortest_path sp;
             for(int i = 0; i < 10; i++) {
+
+                // Gabarito (usa fila de prioridade do C++ para comparar resultados) ----------
+
+                uniform_int_distribution<> dist(1,qtd_ver);
+                int st = dist(gen);
+
+                pq pq_cpp = create_pq(BINHCPP, qtd_ver, max_weight, 1);
+                gabarito.init_dijkstra(pq_cpp, qtd_ver, st, false);
+                gabarito.dijkstra_ndk(g, pq_cpp);
+                delete pq_cpp;
+
+
                 if(dk){
                     cache.start();
                     otimer.start();
@@ -195,6 +201,7 @@ void exp(){
                         }
                     }
                 }
+                gabarito.clear();
                 sp.clear();
                 delete q;
             }
@@ -203,7 +210,6 @@ void exp(){
 
         cout << "\n------------------------------\n";
 
-        gabarito.clear();
     }
     fileO.close();
 }

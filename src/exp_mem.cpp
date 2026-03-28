@@ -88,12 +88,6 @@ void exp(string input, string fila, char restart){
     // Gabarito (usa fila de prioridade do C++ para comparar resultados) ----------
 
     int st = 10;
-    shortest_path gabarito;
-
-    pq pq_cpp = create_pq(BINHCPP, qtd_ver, max_weight, 6);
-    gabarito.init_dijkstra(pq_cpp, qtd_ver, st, false);
-    gabarito.dijkstra_ndk(g, pq_cpp);
-    delete pq_cpp;
 
     // ----------------------------------------------------------------------------
 
@@ -122,7 +116,7 @@ void exp(string input, string fila, char restart){
     if((p==_1LVBQDK || p==_1LVBQ) && input=="GEN9") exit(0);
 
     shortest_path sp;
-    for(int i = 0; i < 10; i++) {
+    for(int i = 0; i < 1; i++) {
         if(dk){
             q = create_pq(p, qtd_ver, max_weight, lv_int);
             sp.init_dijkstra(q, qtd_ver, st, dk);
@@ -136,23 +130,11 @@ void exp(string input, string fila, char restart){
 
         if(fila[0]=='K') fila = '_'+lv+"BQTH";
 
-        if (i == 0) {
-            for(int j = 0; j < qtd_ver; j++){
-                if(gabarito.dist[j] != sp.dist[j]){
-                    cerr << "\nERRO: distâncias calculadas com a fila " << fila << " incorretas.\n";
-                    exit(1);
-                }
-            }
-        }
         sp.clear();
         delete q;
     }
 
-    long long mem = getPeakMemory();
-
     cout << "\n------------------------------\n";
-
-    gabarito.clear();
 
     string output = "../data/outs/all_mem.csv";
 
@@ -170,6 +152,7 @@ void exp(string input, string fila, char restart){
     // Sempre abre em modo append para escrever o resultado
     ofstream fileO(output, ios::app);
     fileO << fixed << setprecision(6);
+    long long mem = getPeakMemory();
     //long long delta = mem_fim - mem_st;
     cout << "Uso de memória: " << mem << " bytes\n";
     fileO << input << " " << qtd_ver << " " << qtd_edges << " "
