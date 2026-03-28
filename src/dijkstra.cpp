@@ -1,5 +1,6 @@
 #include<bits/stdc++.h>
 #include"heaps.cpp"
+#include"../utils/perf.hpp"
 
 using namespace std;
 typedef heap_inter* pq;      // heaps gerais
@@ -44,6 +45,58 @@ struct shortest_path {
                     q->insert(v, dist[v], w);
                 }
             }
+        }
+    };
+
+    void dijkstra_dk_perf(const auto &adj, pq &q, ofstream& file, string carac) {
+        CacheStats cache;
+
+        while(!q->empty()) {
+            cache.start();
+            auto [du, u] = q->extract_min();
+            cache.stop();
+
+            file << carac << " extractMin " << cache.r_cycles << " " << cache.r_instructions << " " << cache.r_branch_instr << " " << cache.r_branch_miss << "\n";
+    
+            for(auto [w, v] : adj[u]) {
+                if(dist[v] > dist[u] + w) {
+                    cache.start();
+                    q->decrease_key(v, w, dist[v], dist[u]+w);
+                    cache.stop();
+                    file << carac << " dk " << cache.r_cycles << " " << cache.r_instructions << " " << cache.r_branch_instr << " " << cache.r_branch_miss << "\n";
+
+                    pai[v] = u;
+                    dist[v] = dist[u] + w;
+                }
+            }
+        }
+    };
+
+    void dijkstra_ndk_perf(const auto &adj, pq &q, ofstream& file, string carac) {
+
+        CacheStats cache;
+
+        while(!q->empty()) {
+            cache.start();
+            auto [du, u] = q->extract_min();
+            cache.stop();
+
+            file << carac << " extractMin " << cache.r_cycles << " " << cache.r_instructions << " " << cache.r_branch_instr << " " << cache.r_branch_miss << "\n";
+            
+            if(dist[u] < du) continue;
+    
+            for(auto [w, v] : adj[u]) {
+                if(dist[v] > dist[u] + w) {
+                    pai[v] = u;
+                    dist[v] = dist[u] + w;
+                    cache.start();
+                    q->insert(v, dist[v], w);
+                    cache.stop();
+
+                    file << carac << " insert " << cache.r_cycles << " " << cache.r_instructions << " " << cache.r_branch_instr << " " << cache.r_branch_miss << "\n";
+                }
+            }
+  
         }
     };
 

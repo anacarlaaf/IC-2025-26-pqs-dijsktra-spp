@@ -1,3 +1,5 @@
+#pragma once
+
 #include<bits/stdc++.h>
 #include"define.hpp"
 #include<papi.h>
@@ -110,16 +112,25 @@ constexpr uint64_t cache_config(uint32_t cache,
 // ─────────────────────────────────────────────────────────────
 struct CacheStats {
 
-    // ─── Cache ─────────────────────────
+    // ─── L1 ────────────────────────────
+    PerfCounter l1_load_access {
+        PERF_TYPE_HW_CACHE,
+        cache_config(PERF_COUNT_HW_CACHE_L1D,
+                     PERF_COUNT_HW_CACHE_OP_READ,
+                     PERF_COUNT_HW_CACHE_RESULT_ACCESS) };
+
     PerfCounter l1_load_miss {
         PERF_TYPE_HW_CACHE,
         cache_config(PERF_COUNT_HW_CACHE_L1D,
                      PERF_COUNT_HW_CACHE_OP_READ,
                      PERF_COUNT_HW_CACHE_RESULT_MISS) };
 
-    PerfCounter l2_refs {
-        PERF_TYPE_HARDWARE,
-        PERF_COUNT_HW_CACHE_REFERENCES };
+    // ─── LLC (L3) ──────────────────────
+    PerfCounter llc_load_access {
+        PERF_TYPE_HW_CACHE,
+        cache_config(PERF_COUNT_HW_CACHE_LL,
+                     PERF_COUNT_HW_CACHE_OP_READ,
+                     PERF_COUNT_HW_CACHE_RESULT_ACCESS) };
 
     PerfCounter llc_load_miss {
         PERF_TYPE_HW_CACHE,
@@ -127,7 +138,7 @@ struct CacheStats {
                      PERF_COUNT_HW_CACHE_OP_READ,
                      PERF_COUNT_HW_CACHE_RESULT_MISS) };
 
-    // ─── TLB (NOVO) ───────────────────
+    // ─── TLB ───────────────────────────
     PerfCounter dtlb_load_miss {
         PERF_TYPE_HW_CACHE,
         cache_config(PERF_COUNT_HW_CACHE_DTLB,
@@ -135,95 +146,77 @@ struct CacheStats {
                      PERF_COUNT_HW_CACHE_RESULT_MISS) };
 
     // ─── CPU ───────────────────────────
-    PerfCounter cycles {
-        PERF_TYPE_HARDWARE,
-        PERF_COUNT_HW_CPU_CYCLES };
-
-    PerfCounter instructions {
-        PERF_TYPE_HARDWARE,
-        PERF_COUNT_HW_INSTRUCTIONS };
+    PerfCounter cycles        { PERF_TYPE_HARDWARE, PERF_COUNT_HW_CPU_CYCLES };
+    PerfCounter instructions  { PERF_TYPE_HARDWARE, PERF_COUNT_HW_INSTRUCTIONS };
 
     // ─── Branch ────────────────────────
-    PerfCounter branch_misses {
-        PERF_TYPE_HARDWARE,
-        PERF_COUNT_HW_BRANCH_MISSES };
+    PerfCounter branch_misses { PERF_TYPE_HARDWARE, PERF_COUNT_HW_BRANCH_MISSES };
+    PerfCounter branch_instr  { PERF_TYPE_HARDWARE, PERF_COUNT_HW_BRANCH_INSTRUCTIONS };
 
-    PerfCounter branch_instr {
-        PERF_TYPE_HARDWARE,
-        PERF_COUNT_HW_BRANCH_INSTRUCTIONS };
-
-    // ─── Memória / OS ──────────────────
-    PerfCounter page_faults {
-        PERF_TYPE_SOFTWARE,
-        PERF_COUNT_SW_PAGE_FAULTS };
+    // ─── OS ────────────────────────────
+    PerfCounter page_faults   { PERF_TYPE_SOFTWARE, PERF_COUNT_SW_PAGE_FAULTS };
 
     // ─── Resultados ────────────────────
-    uint64_t r_l1, r_l2, r_llc;
+    uint64_t r_l1_access, r_l1_miss;
+    uint64_t r_l2_access, r_l2_miss;
+    uint64_t r_llc_access, r_llc_miss;
     uint64_t r_dtlb;
     uint64_t r_cycles, r_instructions;
     uint64_t r_branch_miss, r_branch_instr;
     uint64_t r_page_faults;
-    long     r_rss_kb;
 
-    // ───────────────────────────────────
     void start() {
-        l1_load_miss.start();
-        l2_refs.start();
-        llc_load_miss.start();
+        l1_load_access.start();  l1_load_miss.start();
+        llc_load_access.start(); llc_load_miss.start();
         dtlb_load_miss.start();
-        cycles.start();
-        instructions.start();
-        branch_misses.start();
-        branch_instr.start();
+        cycles.start();          instructions.start();
+        branch_misses.start();   branch_instr.start();
         page_faults.start();
     }
 
-    // ───────────────────────────────────
     void stop() {
-        r_page_faults  = page_faults.stop();
-        r_branch_instr = branch_instr.stop();
-        r_branch_miss  = branch_misses.stop();
-        r_instructions = instructions.stop();
-        r_cycles       = cycles.stop();
-        r_dtlb         = dtlb_load_miss.stop();
-        r_llc          = llc_load_miss.stop();
-        r_l2           = l2_refs.stop();
-        r_l1           = l1_load_miss.stop();
-
+        r_l1_access   = l1_load_access.stop();
+        r_l1_miss     = l1_load_miss.stop();
+        r_llc_access  = llc_load_access.stop();
+        r_llc_miss    = llc_load_miss.stop();
+        r_dtlb        = dtlb_load_miss.stop();
+        r_cycles      = cycles.stop();
+        r_instructions= instructions.stop();
+        r_branch_miss = branch_misses.stop();
+        r_branch_instr= branch_instr.stop();
+        r_page_faults = page_faults.stop();
     }
 
-    // ───────────────────────────────────
     void print(const char* label) {
-
-        double ipc = r_cycles ?
-            (double)r_instructions / r_cycles : 0.0;
-
-        double br_miss_rate = r_branch_instr ?
-            (double)r_branch_miss / r_branch_instr : 0.0;
+        auto miss_rate = [](uint64_t miss, uint64_t total) -> double {
+            return total ? (double)miss / total : 0.0;
+        };
 
         printf("=== %s ===\n", label);
 
         printf("\nCPU:\n");
         printf("  Instructions : %10lu\n", r_instructions);
         printf("  Cycles       : %10lu\n", r_cycles);
-        printf("  IPC          : %10.3f\n", ipc);
+        printf("  IPC          : %10.3f\n", r_cycles ? (double)r_instructions / r_cycles : 0.0);
 
         printf("\nBranch:\n");
         printf("  Branch instr : %10lu\n", r_branch_instr);
         printf("  Branch miss  : %10lu\n", r_branch_miss);
-        printf("  Miss rate    : %10.3f\n", br_miss_rate);
+        printf("  Miss rate    : %10.3f%%\n", miss_rate(r_branch_miss, r_branch_instr) * 100);
 
         printf("\nCache:\n");
-        printf("  L1 miss      : %10lu\n", r_l1);
-        printf("  L2 refs      : %10lu\n", r_l2);
-        printf("  LLC miss     : %10lu\n", r_llc);
+        printf("  L1  access   : %10lu\n", r_l1_access);
+        printf("  L1  miss     : %10lu  (%.3f%%)\n", r_l1_miss,  miss_rate(r_l1_miss,  r_l1_access)  * 100);
+        printf("  L2  access   : %10lu  (pode ser 0 em Intel)\n", r_l2_access);
+        printf("  L2  miss     : %10lu  (%.3f%%)\n", r_l2_miss,  miss_rate(r_l2_miss,  r_l2_access)  * 100);
+        printf("  LLC access   : %10lu\n", r_llc_access);
+        printf("  LLC miss     : %10lu  (%.3f%%)\n", r_llc_miss, miss_rate(r_llc_miss, r_llc_access) * 100);
 
         printf("\nTLB:\n");
         printf("  DTLB miss    : %10lu\n", r_dtlb);
 
         printf("\nMemory:\n");
         printf("  Page faults  : %10lu\n", r_page_faults);
-
         printf("\n");
     }
 };

@@ -3,15 +3,16 @@
 set -e
 
 sudo sysctl -w kernel.perf_event_paranoid=1
-
-rm -f ../data/outs/all_mem.csv
-
-g++ -std=c++20 exp_mem.cpp -o exp_mem
-./s_exp_mem.sh
+sudo cpupower frequency-set -g performance
 
 g++ -std=c++20 exp_time_cache.cpp -o exp_time_cache
 ./exp_time_cache
 
+g++ -std=c++20 exp_ops.cpp -o exp_ops
+./exp_ops
+
+g++ -std=c++20 exp_pin.cpp -o exp_pin
+chmod +x exp_pin
+./exp_pin
 
 echo "Execução concluída com sucesso!"
-echo -e "\a"

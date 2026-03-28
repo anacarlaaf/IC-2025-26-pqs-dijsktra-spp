@@ -5,8 +5,8 @@
 using namespace std;
 
 // sudo sysctl -w kernel/perf_event_paranoid=1 (pra permitir ler cache miss)
-// g++ -std=c++20 exp_time_cache.cpp -o exp_time_cache
-// g++ -fsanitize=address,undefined -g -std=c++20 exp_time_cache.cpp -o exp_time_cache
+// g++ -std=c++20 exp_ops.cpp -o exp_ops
+// g++ -fsanitize=address,undefined -g -std=c++20 exp_ops.cpp -o exp_ops
 
 pq create_pq(PQS q, int n, keyType c, int k=0) {
     switch(q) {
@@ -61,12 +61,12 @@ void exp(){
 
     // 2. Formatar arquivo de saída dos resultados----
 
-    string output = "../data/outs/all_time_cache.csv";
+    string output = "../data/outs/all_ops.csv";
 
     ofstream fileO(output);
 
     fileO << fixed << setprecision(6);
-    fileO <<"nome n m c insert extractMin dk bkmp fila cpu_time wall_time l1_ac l1_miss llc_ac llc_miss cycles inst dtlb page_faults branch_inst branch_miss\n";
+    fileO << "nome n m c fila operacao cycles inst branch_inst branch_miss\n";
     fileO.flush();
 
     shortest_path gabarito;
@@ -122,8 +122,6 @@ void exp(){
         cout << "Maior peso: " << max_weight << "\n";
         cout << "Carregando..." << "\n";
 
-        int elap_cpu, elap_wall;
-
         // Experimentos
 
         for(string s : pqs) {
@@ -150,7 +148,7 @@ void exp(){
             pq q;
 
             shortest_path sp;
-            for(int i = 0; i <= 10; i++) {
+            for(int i = 0; i <= 1; i++) {
 
                 uniform_int_distribution<> dist(1,qtd_ver);
                 int st = dist(gen);
@@ -179,33 +177,23 @@ void exp(){
                 timer otimer;
                 CacheStats cache;
 
+                string carac = (stringstream() 
+                    << f << " "
+                    << qtd_ver << " "
+                    << qtd_edges << " "
+                    << max_weight << " "
+                    << s).str();
+
                 if(dk){
                     q = create_pq(p, qtd_ver, max_weight, lv_int);
                     sp.init_dijkstra(q, qtd_ver, st, dk);
-
-                    otimer.start();
-                    cache.start();
-                    sp.dijkstra_dk(g, q);
-                    cache.stop();
-                    otimer.stop();
+                    sp.dijkstra_dk_perf(g, q, fileO, carac);
                 }
                 else{
                     q = create_pq(p, qtd_ver, max_weight, lv_int);
                     sp.init_dijkstra(q, qtd_ver, st, dk);
-
-                    otimer.start();
-                    cache.start();
-                    sp.dijkstra_ndk(g, q);
-                    cache.stop();
-                    otimer.stop();
+                    sp.dijkstra_ndk_perf(g, q, fileO, carac);
                 }
-
-                elap_cpu = otimer.elapsed_cpu_ms();
-                elap_wall = otimer.elapsed_wall_ms();
-                ops op = q->get_op();
-                fileO << f << " " << qtd_ver << " " << qtd_edges << " " << max_weight << " " << op.ins <<" " << op.exmin <<" " << op.dk <<" " << op.bkemp <<" "<< s << " " << elap_cpu << " " << elap_wall << 
-                " " << cache.r_l1_access << " " << cache.r_l1_miss << " " << cache.r_llc_access << " " << cache.r_llc_miss << " " << cache.r_cycles << " " << cache.r_instructions << " " << 
-                cache.r_dtlb << " " << cache.r_page_faults << " " << cache.r_branch_instr << " " << cache.r_branch_miss << "\n";
 
                 for(int j = 0; j < qtd_ver; j++){
                     if(gabarito.dist[j] != sp.dist[j]){
