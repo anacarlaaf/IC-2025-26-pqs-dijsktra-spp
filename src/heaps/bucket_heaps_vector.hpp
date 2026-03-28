@@ -28,7 +28,6 @@ struct _1lv_bucket_queue{
     void update() {
         if (b[a].size()) return;
 
-        op.upd++;
         int bg = a;
         int aux = b_size-1;
         do {

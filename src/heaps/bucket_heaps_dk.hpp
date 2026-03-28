@@ -43,9 +43,7 @@ struct _1lv_bucket_queue_DK{
 
     void update(){
         if (bucket[a].sz) return;
-
-        op.upd++;
-
+        
         int bg = a;
         int aux = b_size-1;
         do {

@@ -36,8 +36,8 @@ void exp(){
     vector<string> pqs;
     vector<string> inputs;
 
-    string inputsFile = "in_graphs.txt";
-    string pqsFile = "in_filas.txt";
+    string inputsFile = "in_pin_graphs.txt";
+    string pqsFile = "in_pin_filas.txt";
 
     ifstream file_data(inputsFile);
     ifstream file_pqs(pqsFile);

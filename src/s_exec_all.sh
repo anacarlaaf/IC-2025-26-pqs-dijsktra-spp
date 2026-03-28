@@ -12,6 +12,6 @@ g++ -std=c++20 exp_ops.cpp -o exp_ops
 
 g++ -std=c++20 exp_pin.cpp -o exp_pin
 chmod +x exp_pin
-./exp_pin
+./s_exp_pin.sh
 
 echo "Execução concluída com sucesso!"

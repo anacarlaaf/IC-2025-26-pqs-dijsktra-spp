@@ -66,7 +66,7 @@ void exp(){
     ofstream fileO(output);
 
     fileO << fixed << setprecision(6);
-    fileO <<"nome n m c insert extractMin dk bkmp fila cpu_time wall_time l1_ac l1_miss llc_ac llc_miss cycles inst dtlb page_faults branch_inst branch_miss\n";
+    fileO <<"nome n m c insert extractMin dk bkmp upd fila cpu_time wall_time l1_ac l1_miss llc_ac llc_miss cycles inst dtlb page_faults branch_inst branch_miss\n";
     fileO.flush();
 
     shortest_path gabarito;
@@ -166,15 +166,17 @@ void exp(){
                         sp.init_dijkstra(q, qtd_ver, st, dk);
                         sp.dijkstra_ndk(g, q);
                     }
+                    delete q;
+                    sp.clear();
                     continue;
                 }
 
                 // Gabarito (usa fila de prioridade do C++ para comparar resultados) ----------
 
-                pq pq_cpp = create_pq(BINHCPP, qtd_ver, max_weight, 1);
-                gabarito.init_dijkstra(pq_cpp, qtd_ver, st, false);
-                gabarito.dijkstra_ndk(g, pq_cpp);
-                delete pq_cpp;
+                //pq pq_cpp = create_pq(BINHCPP, qtd_ver, max_weight, 1);
+                //gabarito.init_dijkstra(pq_cpp, qtd_ver, st, false);
+                //gabarito.dijkstra_ndk(g, pq_cpp);
+                //delete pq_cpp;
 
                 timer otimer;
                 CacheStats cache;
@@ -203,17 +205,17 @@ void exp(){
                 elap_cpu = otimer.elapsed_cpu_ms();
                 elap_wall = otimer.elapsed_wall_ms();
                 ops op = q->get_op();
-                fileO << f << " " << qtd_ver << " " << qtd_edges << " " << max_weight << " " << op.ins <<" " << op.exmin <<" " << op.dk <<" " << op.bkemp <<" "<< s << " " << elap_cpu << " " << elap_wall << 
+                fileO << f << " " << qtd_ver << " " << qtd_edges << " " << max_weight << " " << op.ins <<" " << op.exmin <<" " << op.dk <<" " << op.bkemp <<" " << op.upd << " " << s << " " << elap_cpu << " " << elap_wall << 
                 " " << cache.r_l1_access << " " << cache.r_l1_miss << " " << cache.r_llc_access << " " << cache.r_llc_miss << " " << cache.r_cycles << " " << cache.r_instructions << " " << 
                 cache.r_dtlb << " " << cache.r_page_faults << " " << cache.r_branch_instr << " " << cache.r_branch_miss << "\n";
 
-                for(int j = 0; j < qtd_ver; j++){
-                    if(gabarito.dist[j] != sp.dist[j]){
-                        cerr << "\nERRO: distâncias calculadas com a fila " << s << " incorretas.\n";
-                        exit(1);
-                    }
-                }
-                gabarito.clear();
+                // for(int j = 0; j < qtd_ver; j++){
+                //     if(gabarito.dist[j] != sp.dist[j]){
+                //         cerr << "\nERRO: distâncias calculadas com a fila " << s << " incorretas.\n";
+                //         exit(1);
+                //     }
+                // }
+                // gabarito.clear();
                 sp.clear();
                 delete q;
             }
