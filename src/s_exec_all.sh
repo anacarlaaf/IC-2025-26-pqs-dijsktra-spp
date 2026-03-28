@@ -3,7 +3,6 @@
 set -e
 
 sudo sysctl -w kernel.perf_event_paranoid=1
-sudo cpupower frequency-set -g performance
 
 g++ -std=c++20 exp_time_cache.cpp -o exp_time_cache
 ./exp_time_cache
