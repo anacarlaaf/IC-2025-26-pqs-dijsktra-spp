@@ -6,5 +6,7 @@ data/txts/*
 
 data/dimension_reduction/
 data/outs/0328/all_ops.csv
+data/outs/03282/all_ops.csv
+
 
 docs/
