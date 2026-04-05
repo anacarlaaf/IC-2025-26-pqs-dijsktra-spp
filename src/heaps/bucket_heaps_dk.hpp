@@ -303,7 +303,8 @@ struct _klv_bucket_queue_DK{
         // distribuir até chegarem ao último nível
         for(int i=aux; i<lv-1; i++){
             act[i+1] = size[0];
-            while(bucket[i][act[i]].sz){
+            int aux2 = bucket[i][act[i]].sz;
+            for(int j=0;j<aux2;j++){
                 int tail_idx = bucket[i][act[i]].tail;
                 par v = pool.pool[tail_idx].data;
                 pool.pop(&bucket[i][act[i]]);
@@ -323,11 +324,17 @@ struct _klv_bucket_queue_DK{
     }
  
     par extract_min(){
+        for(int i=0;i<lv;i++){
+            int real = 0;
+            for(int j=0;j<size[0];j++) real += bucket[i][j].sz;
+            assert(real == actLv[i]); // se falhar, actLv está errado
+        }
         update();
         assert(bucket[lv-1][act[lv-1]].sz);
         assert(act[lv-1]>=0 && act[lv-1]<size[0]);
         
         par min_elem = pool.pool[bucket[lv-1][act[lv-1]].tail].data;
+        qBucket[min_elem.second] = {-1, -1};
         pool.pop(&bucket[lv-1][act[lv-1]]);
         actLv[lv-1]--;
         sz--;
