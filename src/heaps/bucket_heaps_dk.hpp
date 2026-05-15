@@ -74,6 +74,7 @@ struct _1lv_bucket_queue_DK{
             pool.remove(u, &bucket[k]);
             sz--;
             op.dk++;
+            op.ins--;
         }
         insert(u, new_du, w);
     }
@@ -188,173 +189,202 @@ struct _2lv_bucket_queue_DK{
             }
             sz--;
             op.dk++;
+            op.ins--;
         }
         insert(u, new_du, w);
     }
 };
 
 struct _klv_bucket_queue_DK{
-    
-    ops op;
-    pool_list pool;
-    pair<int,int> *qBucket;
-    bkt **bucket; //
-    int *actLv; //
-    ll *size;   //
-    int *act;    //     // bucket ativos
-    int sz;
-    int lv;
  
-    // inicia os buckets
-    _klv_bucket_queue_DK(keyType c, int n_, int k) {
-        lv = k;
-
-        c++;
-        int targ= ceil(pow((int)c, 1.0 / k));
-        int aux = 1 << (32 - __builtin_clz(targ - 1));
-
-        size    = new ll[k]();
-        act     = new int[k]();
-        actLv   = new int[k]();
+    pool_list pool;
+    bkt **bucket;
+    pair<int,int> *qBucket;
+    int *actBucket; // bucket ativo em cada nível
+    keyType *width; // largura dos buckets de cada nível
+    keyType *lowerB;// lower bounds de cada nível
+    keyType *upperB;// upper bounds de cada nível
+    int *sizeLv;    // qtd de elementos por nível 
+    int r;          // rounds
+    int size;       // total na estrutura
+    int k;          // níveis
+    keyType d;      // qtd de buckets por nível
+    ops op;
+ 
+    // inicializa as estruturas
+    _klv_bucket_queue_DK(keyType c, int n, int niveis) {
+        k = niveis;
+        r=0;
+        size = 0;
+        d = ceil(pow((double)(c+1), 1.0 / k)) + 1;
+ 
+        actBucket  = new int[k]();
+        width      = new keyType[k]();
+        lowerB     = new keyType[k]();
+        upperB     = new keyType[k]();
+        qBucket = new pair<int,int>[n];
+        sizeLv     = new int[k]();
         bucket  = new bkt*[k];
-        qBucket = new pair<int,int>[n_];
-        pool    = pool_list(n_);
-
-        ll acc = aux;
-        for (int i = 0; i < k; i++) {
-            size[i]   = acc;
-            bucket[i] = new bkt[aux]();                        // sz=0, tail=0
-            for (int j = 0; j < aux; j++) bucket[i][j].tail = -1;
-            acc *= aux;
+        pool    = pool_list(n);
+ 
+        width[0] = 1;
+        for (int i=1;i<k;i++) width[i] = width[i-1]*d;
+        
+        lowerB[k-1] = 0;
+        upperB[k-1] = d * width[k-1] - 1;
+        for(int i=k-2;i>=0;i--) updBounds(i);
+ 
+        for (int i=0;i<k;i++){
+            bucket[i] = new bkt[d]();
+            for (int j = 0; j < d; j++) bucket[i][j].tail = -1;
         }
-
-        memset(qBucket, -1, sizeof(pair<int,int>) * n_);
-        sz = 0;
+        for(int i = 0; i < n; i++) qBucket[i] = {-1, -1};
     }
-
+    
+ 
+    // destroi estruturas
     ~_klv_bucket_queue_DK(){
-        for(int i=0;i<lv;i++){
+        for(int i=0;i<k;i++){
             delete[] bucket[i];
         }
         delete[] bucket;
-        delete[] actLv;
-        delete[] size;
-        delete[] act;
+        delete[] actBucket;        
+        delete[] width;
+        delete[] lowerB;
+        delete[] upperB;
+        delete[] sizeLv;
         delete[] qBucket;
         pool.del();
     };
  
-    void insert(int v, keyType dist, keyType w){
-        sz++;
+    void updTopBounds(){
+        lowerB[k-1] = r * d * width[k-1];
+        upperB[k-1] = lowerB[k-1] + d * width[k-1] - 1;
+    }
+ 
+    void updBounds(int lv){
+        lowerB[lv] = lowerB[lv+1] + actBucket[lv+1] * width[lv+1];
+        upperB[lv] = lowerB[lv] + d * width[lv] - 1;
+    }
+ 
+    void insert(int v, keyType dist){
+        // procura nível em que dist está dentro dos bounds
         op.ins++;
-        
-        ll lvs;
-        ll mod = size[0]-1;
-        for(int i=0;i<lv-2;i++){
-            lvs = (dist/size[lv-i-1]) & mod;
-            if(lvs != act[i]){
-                pool.insert({dist,v}, &bucket[i][lvs]);
-                qBucket[v].first = i; qBucket[v].second = lvs;
-                actLv[i]++;
+
+        for(int i=0;i<k;i++){
+            if(lowerB[i] <= dist && dist <= upperB[i]){
+                int j = (int)((dist - lowerB[i]) / width[i]);
+                assert(0 <= j && j < d);
+                pool.insert({dist,v}, &bucket[i][j]);
+                qBucket[v] = {i,j};
+                sizeLv[i]++;
+                size++;
                 return;
             }
         }
-
-        lvs = (dist/size[lv-2]) & mod;
-        ll last_lvs = dist & mod;
-        if (lvs != act[lv-2] || last_lvs < act[lv-1]){
-            pool.insert({dist,v}, &bucket[lv-2][lvs]);
-            qBucket[v].first = lv-2; qBucket[v].second = lvs;
-            actLv[lv-2]++;
-        }
-        else{
-            pool.insert({dist,v}, &bucket[lv-1][last_lvs]);
-            qBucket[v].first = lv-1; qBucket[v].second = last_lvs;
-            actLv[lv-1]++;
-        }
+ 
+        // se não estiver nos bounds, wrap-around no top-level
+        int j = (dist - upperB[k-1] - 1) / width[k-1];
+        assert(0 <= j && j < d);
+        pool.insert({dist,v}, &bucket[k-1][j]);
+        qBucket[v] = {k-1,j};
+        sizeLv[k-1]++;
+        size++;
     }
  
-    void update(){
-        // procura bucket não vazio no nível mais baixo
-        while(act[lv-1] < size[0] && bucket[lv-1][act[lv-1]].sz==0) {
-            act[lv-1]++;
-            op.bkemp++;
-        }
-        if(act[lv-1] < size[0]) return;
+    void update() {
+        // procura bucket não vazio no bottom level
 
         op.upd++;
-        // se não encontrar, expandir
-        // procurar nível não vazio
-        int aux = lv-2;
-        while(aux>=0 && actLv[aux] <= 0) aux--;
-
-        // atualiza bucket ativo
-        int mod = size[0]-1;
-        int b = act[aux];
-         do{
-            if(bucket[aux][b].sz) break;
+        while(actBucket[0] < d && bucket[0][actBucket[0]].sz==0){
+            actBucket[0]++;
             op.bkemp++;
-            b = (b + 1) & mod;
-        } while(b!=act[aux]);
-        act[aux] = b;
-        assert(b < size[0]);
-        assert(bucket[aux][b].sz);
+        }
+        if(actBucket[0] < d) return;
 
-        // distribuir até chegarem ao último nível
-        for(int i=aux; i<lv-1; i++){
-            act[i+1] = size[0];
-            int aux2 = bucket[i][act[i]].sz;
-            for(int j=0;j<aux2;j++){
-                int tail_idx = bucket[i][act[i]].tail;
-                par v = pool.pool[tail_idx].data;
-                pool.pop(&bucket[i][act[i]]);
-                actLv[i]--;
-
-                int novo;
-                if (i+1==lv-1) novo = v.first & mod;
-                else novo = (v.first/size[lv-i-2]) & mod;
-
-                pool.insert(v, &bucket[i+1][novo]);
-                qBucket[v.second].first  = i + 1;
-                qBucket[v.second].second = novo;
-                actLv[i+1]++;
-                act[i+1] = min(act[i+1], novo);
+        op.upd++;
+ 
+        // encontra o nível mais baixo não vazio
+        int f = 1;
+        while(f < k && sizeLv[f] == 0) f++;
+ 
+        // se top-level e ele está vazio, próximo round
+        if(f == k-1) {
+            while(actBucket[f] < d && bucket[f][actBucket[f]].sz==0){
+                actBucket[f]++;
+                op.upd++;
             }
+ 
+            if(actBucket[f] == d) {
+                r++;
+                updTopBounds();
+                actBucket[f] = 0;
+                while(actBucket[f] < d && bucket[f][actBucket[f]].sz==0){
+                    actBucket[f]++;
+                    op.upd++;
+                }
+                assert(actBucket[f] < d);
+            }
+            // atualiza bounds dos níveis abaixo antes de expandir
+            for(int idx = k-2; idx >= 0; idx--) updBounds(idx);
+        }
+ 
+        // expande do nível f até o nível 1
+        for(int i = f; i > 0; i--) {
+            while(actBucket[i] < d && bucket[i][actBucket[i]].sz==0)
+                actBucket[i]++;
+ 
+            assert(actBucket[i] < d);
+ 
+            // atualiza os bounds do nível abaixo
+            updBounds(i-1);
+            int new_act = d;
+ 
+            // distribui elementos no nível abaixo
+            int src = actBucket[i];
+            while(bucket[i][src].sz) {
+                int idx = bucket[i][src].tail;
+                par elem = pool.pool[idx].data;
+                pool.pop(&bucket[i][src]);
+                sizeLv[i]--;
+ 
+                int target = (elem.first - lowerB[i-1]) / width[i-1];
+                assert(0 <= target && target < d);
+ 
+                new_act = min(new_act, target);
+                pool.insert(elem, &bucket[i-1][target]);
+                qBucket[elem.second] = {i-1, target};
+                sizeLv[i-1]++;
+            }
+ 
+            if(new_act < d) actBucket[i-1] = new_act;
         }
     }
  
     par extract_min(){
-        for(int i=0;i<lv;i++){
-            int real = 0;
-            for(int j=0;j<size[0];j++) real += bucket[i][j].sz;
-            assert(real == actLv[i]); // se falhar, actLv está errado
-        }
-        update();
-        assert(bucket[lv-1][act[lv-1]].sz);
-        assert(act[lv-1]>=0 && act[lv-1]<size[0]);
-        
-        par min_elem = pool.pool[bucket[lv-1][act[lv-1]].tail].data;
-        qBucket[min_elem.second] = {-1, -1};
-        pool.pop(&bucket[lv-1][act[lv-1]]);
-        actLv[lv-1]--;
-        sz--;
         op.exmin++;
-        return min_elem;
+        update();
+        int j = actBucket[0];
+        assert(j < d && bucket[0][j].sz);
+        par v = pool.pool[bucket[0][actBucket[0]].tail].data;
+        qBucket[v.second] = {-1,-1};
+        pool.pop(&bucket[0][actBucket[0]]);
+        sizeLv[0]--;
+        size--;
+        return v;
     }
  
-    bool empty() {
-        if (sz) return false;
-        return true;
-    }
-
+    bool empty() { return size == 0; }
+ 
     void decrease_key(int u, keyType w, keyType old_du, keyType new_du){
-        if(pool.idxs[u] != -1) {
-            pair<int, int> loc = qBucket[u];
+        if(pool.idxs[u]!=-1){
+            pair<int,int> loc = qBucket[u];
             pool.remove(u, &bucket[loc.first][loc.second]);
-            actLv[loc.first]--;
-            sz--;
+            sizeLv[loc.first]--;
+            size--;
             op.dk++;
+            op.ins--;
         }
-        insert(u, new_du, w);
+        insert(u, new_du);
     }
 };

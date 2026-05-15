@@ -134,139 +134,162 @@ struct _2lv_bucket_queue{
 
 
 struct _klv_bucket_queue{
-    vector<par> **bucket; //
-    int *actLv; //
-    ll *size;   //
-    int *act;    //     // bucket ativos
-    int sz;
-    int lv;
+    vector<par> **bucket;
+    int *actBucket; // bucket ativo em cada nível
+    keyType *width; // largura dos buckets de cada nível
+    keyType *lowerB;// lower bounds de cada nível
+    keyType *upperB;// upper bounds de cada nível
+    int *sizeLv;    // qtd de elementos por nível 
+    int r;          // rounds
+    int size;       // total na estrutura
+    int k;          // níveis
+    keyType d;      // qtd de buckets por nível
     ops op;
  
-    // inicia os buckets
-    _klv_bucket_queue(keyType c, int k) {
-        lv = k;
-
-        // raiz k-ésima inteira de c, arredondada para cima
-        c++;
-        int targ= ceil(pow((int)c, 1.0 / k));
-        int aux = 1 << (32 - __builtin_clz(targ - 1));
-
-        size   = new ll[k]();
-        act    = new int[k]();
-        actLv  = new int[k]();
-        bucket = new vector<par>*[k];
-
-        ll acc = aux;
-        for (int i = 0; i < k; i++) {
-            size[i]   = acc;
-            bucket[i] = new vector<par>[aux];
-            acc      *= aux;
-        }
-        
-        sz = 0;
-    }
-
-    ~_klv_bucket_queue(){
-        for(int i=0;i<lv;i++){
-            delete[] bucket[i];
-        }
-        delete[] bucket;
-        delete[] actLv;
-        delete[] size;
-        delete[] act;
-        
-    };
+    _klv_bucket_queue(keyType c, int niveis) {
+        k = niveis;
+        r = 0;
+        size = 0;
+        d = ceil(pow((double)(c+1), 1.0 / k))+1;
  
-    void insert(int v, keyType dist, keyType w){
-        sz++;
+        actBucket  = new int[k]();
+        width      = new keyType[k]();
+        lowerB     = new keyType[k]();
+        upperB     = new keyType[k]();
+        sizeLv     = new int[k]();
+        bucket     = new vector<par>*[k];
+ 
+        width[0] = 1;
+        for(int i=1;i<k;i++) width[i] = width[i-1]*d;
+ 
+        lowerB[k-1] = 0;
+        upperB[k-1] = d * width[k-1] - 1;
+        for(int i=k-2;i>=0;i--) updBounds(i);
+ 
+        for(int i=0;i<k;i++) bucket[i] = new vector<par>[d];
+    }
+ 
+    ~_klv_bucket_queue(){
+        for(int i=0;i<k;i++) delete[] bucket[i];
+        delete[] bucket;
+        delete[] actBucket;
+        delete[] width;
+        delete[] lowerB;
+        delete[] upperB;
+        delete[] sizeLv;
+    }
+ 
+    void updTopBounds(){
+        lowerB[k-1] = r * d * width[k-1];
+        upperB[k-1] = lowerB[k-1] + d * width[k-1] - 1;
+    }
+ 
+    void updBounds(int lv){
+        lowerB[lv] = lowerB[lv+1] + actBucket[lv+1] * width[lv+1];
+        upperB[lv] = lowerB[lv] + d * width[lv] - 1;
+    }
+ 
+    void insert(int v, keyType dist){
         op.ins++;
-        ll lvs;
-        int aux = size[0]-1;
-        for(int i=0;i<lv-2;i++){
-            lvs = (dist/size[lv-i-1]) & aux;
-            if(lvs != act[i]){
-                bucket[i][lvs].push_back({dist, v});
-                actLv[i]++;
+        // procura nível em que dist está dentro dos bounds
+        for(int i=0;i<k;i++){
+            if(lowerB[i] <= dist && dist <= upperB[i]){
+                int j = (int)((dist - lowerB[i]) / width[i]);
+                assert(0 <= j && j < d);
+                bucket[i][j].push_back({dist, v});
+                sizeLv[i]++;
+                size++;
                 return;
             }
         }
-
-        lvs = (dist/size[lv-2]) & aux;
-        ll last_lvs = dist & aux;
-        if (lvs != act[lv-2] || last_lvs < act[lv-1]){
-            bucket[lv-2][lvs].push_back({dist, v});
-            actLv[lv-2]++;
-        }
-        else{
-            bucket[lv-1][last_lvs].push_back({dist, v});
-            actLv[lv-1]++;
-        }
+ 
+        // se não estiver nos bounds, wrap-around no top-level
+        int j = (dist - upperB[k-1] - 1) / width[k-1];
+        assert(0 <= j && j < d);
+        bucket[k-1][j].push_back({dist, v});
+        sizeLv[k-1]++;
+        size++;
     }
  
-    void update(){
-        
-        // procura bucket não vazio no nível mais baixo
-        while(act[lv-1] < size[0] && bucket[lv-1][act[lv-1]].empty()) {
-            act[lv-1]++;
+    void update() {
+        op.upd++;
+        // procura bucket não vazio no bottom level
+        while(actBucket[0] < d && bucket[0][actBucket[0]].empty()){
+            actBucket[0]++;
             op.bkemp++;
         }
-        if(act[lv-1] < size[0]) return;
+        if(actBucket[0] < d) return;
 
         op.upd++;
-
-
-        // se não encontrar, expandir
-        // procurar nível não vazio
-        int aux = lv-2;
-        while(aux>=0 && actLv[aux] <= 0) aux--;
-
-        // atualiza bucket ativo
-        int b = act[aux];
-        int mod = size[0]-1;
-         do{
-            if(!bucket[aux][b].empty()) break;
-            b = (b + 1) & mod;
-            op.bkemp++;
-        } while(b!=act[aux]);
-        act[aux] = b;
-        assert(b < size[0]);
-        assert(!bucket[aux][b].empty());
-
-        // distribuir até chegarem ao último nível
-        for(int i=aux; i<lv-1; i++){
-            act[i+1] = size[0];
-            while(!bucket[i][act[i]].empty()){
-                par v = bucket[i][act[i]].back();
-                bucket[i][act[i]].pop_back();
-                actLv[i]--;
-
-                int novo;
-                if(i+1 == lv-1) novo = v.first & mod;
-                else novo = (v.first / size[lv-i-2]) & mod;
-                
-                bucket[i+1][novo].push_back(v);
-                actLv[i+1]++;
-                act[i+1] = min(act[i+1], novo);
+ 
+        // encontra o nível mais baixo não vazio
+        int f = 1;
+        while(f < k && sizeLv[f] == 0) f++;
+  
+        // se top-level e ele está vazio, próximo round
+        if(f == k-1) {
+            while(actBucket[f] < d && bucket[f][actBucket[f]].empty()){
+                actBucket[f]++;
+                op.bkemp++;
             }
+ 
+            if(actBucket[f] == d) {
+                r++;
+                updTopBounds();
+                actBucket[f] = 0;
+                while(actBucket[f] < d && bucket[f][actBucket[f]].empty()){
+                    actBucket[f]++;
+                    op.bkemp++;
+                }
+                assert(actBucket[f] < d);
+            }
+            // atualiza bounds dos níveis abaixo antes de expandir
+            for(int idx = k-2; idx >= 0; idx--) updBounds(idx);
+        }
+ 
+        // expande do nível f até o nível 1
+        for(int i = f; i > 0; i--) {
+            while(actBucket[i] < d && bucket[i][actBucket[i]].empty()){
+                actBucket[i]++;
+                op.bkemp++;
+            }
+ 
+            assert(actBucket[i] < d);
+ 
+            // atualiza os bounds do nível abaixo
+            updBounds(i-1);
+            int new_act = d;
+
+            // distribui elementos no nível abaixo
+            int src = actBucket[i];
+            while(!bucket[i][src].empty()) {
+                par elem = bucket[i][src].back();
+                bucket[i][src].pop_back();
+                sizeLv[i]--;
+ 
+                int target = (elem.first - lowerB[i-1]) / width[i-1];
+                assert(0 <= target && target < d);
+ 
+                new_act = min(new_act, target);
+                bucket[i-1][target].push_back(elem);
+                sizeLv[i-1]++;
+            }
+ 
+            if(new_act < d) actBucket[i-1] = new_act;
         }
     }
  
     par extract_min(){
-        update();
-
-        assert(!bucket[lv-1][act[lv-1]].empty());
-        assert(act[lv-1]>=0 && act[lv-1]<size[0]);
-        par min_elem = bucket[lv-1][act[lv-1]].back();
-        bucket[lv-1][act[lv-1]].pop_back();
-        actLv[lv-1]--;
-        sz--;
         op.exmin++;
-        return min_elem;
+        update();
+        int j = actBucket[0];
+        assert(j < d && !bucket[0][j].empty());
+        par v = bucket[0][j].back();
+        bucket[0][j].pop_back();
+        sizeLv[0]--;
+        size--;
+        return v;
     }
  
-    bool empty() {
-        if (sz) return false;
-        return true;
-    }
-    
+    bool empty() { return size == 0; }
 };

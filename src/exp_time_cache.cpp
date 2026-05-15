@@ -13,9 +13,6 @@ pq create_pq(PQS q, int n, keyType c, int k=0) {
         case BINHCPP : return new binheapCPP();
         case BINH: return new binheap(n);
         case FIBH: return new fibonacci(n);
-        // case SEQUENCE: return new seq_heap();
-        // case PAIRING: return new pairing_dk();
-        // case HOT: return new hot_queue_dk(c, k);
         case _1LVBQ : return new _1lvbq(c);
         case _2LVBQ : return new _2lvbq(c);
         case _KLVBQ : return new _klvbq(c, k);
@@ -173,10 +170,10 @@ void exp(){
 
                 // Gabarito (usa fila de prioridade do C++ para comparar resultados) ----------
 
-                //pq pq_cpp = create_pq(BINHCPP, qtd_ver, max_weight, 1);
-                //gabarito.init_dijkstra(pq_cpp, qtd_ver, st, false);
-                //gabarito.dijkstra_ndk(g, pq_cpp);
-                //delete pq_cpp;
+                pq pq_cpp = create_pq(BINHCPP, qtd_ver, max_weight, 1);
+                gabarito.init_dijkstra(pq_cpp, qtd_ver, st, false);
+                gabarito.dijkstra_ndk(g, pq_cpp);
+                delete pq_cpp;
 
                 timer otimer;
                 CacheStats cache;
@@ -209,13 +206,13 @@ void exp(){
                 " " << cache.r_l1_access << " " << cache.r_l1_miss << " " << cache.r_llc_access << " " << cache.r_llc_miss << " " << cache.r_cycles << " " << cache.r_instructions << " " << 
                 cache.r_dtlb << " " << cache.r_page_faults << " " << cache.r_branch_instr << " " << cache.r_branch_miss << "\n";
 
-                // for(int j = 0; j < qtd_ver; j++){
-                //     if(gabarito.dist[j] != sp.dist[j]){
-                //         cerr << "\nERRO: distâncias calculadas com a fila " << s << " incorretas.\n";
-                //         exit(1);
-                //     }
-                // }
-                // gabarito.clear();
+                for(int j = 0; j < qtd_ver; j++){
+                    if(gabarito.dist[j] != sp.dist[j]){
+                        cerr << "\nERRO: distâncias calculadas com a fila " << s << " incorretas.\n";
+                        exit(1);
+                    }
+                }
+                gabarito.clear();
                 sp.clear();
                 delete q;
             }

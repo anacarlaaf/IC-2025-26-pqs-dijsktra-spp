@@ -143,7 +143,7 @@ struct _klvbq : heap_inter{
     _klvbq(keyType _c, int k) : bq(_c, k) {}
     
     void insert(int u, keyType du, keyType w) {
-       bq.insert(u, du, w);
+       bq.insert(u, du);
     }
 
     par extract_min() {
@@ -307,7 +307,7 @@ struct _klvbqDK : heap_inter{
     _klvbqDK(keyType _c, int n, int k) : bq(_c, n, k) {}
     
     void insert(int u, keyType du, keyType w) {
-       bq.insert(u, du, w);
+       bq.insert(u, du);
     }
 
     par extract_min() {

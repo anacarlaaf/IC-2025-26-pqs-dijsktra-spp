@@ -140,6 +140,7 @@ struct pool_list{
         if (ant != -1) pool[ant].prox = next;
         if (next != -1) pool[next].prev = ant;
 
+        pool[idx].prev = pool[idx].prox = -1;
         free_top++;
         free_list[free_top] = idx;
         idxs[u] = -1;
